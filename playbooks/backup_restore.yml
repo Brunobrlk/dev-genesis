@@ -1,0 +1,19 @@
+---
+- name: Restore workstation backup
+  hosts: workstation
+  gather_facts: true
+
+  pre_tasks:
+    - name: Validate backup restore target
+      ansible.builtin.import_role:
+        name: checkhost
+      vars:
+        checkhost_target: backup_restore
+      tags:
+        - always
+        - checkhost
+
+  roles:
+    - role: backup_restore
+      tags:
+        - backup_restore

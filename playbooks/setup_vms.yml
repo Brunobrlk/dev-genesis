@@ -1,0 +1,24 @@
+---
+- name: Setup virtual machines on host
+  hosts: vm_hosts
+  gather_facts: true
+
+  pre_tasks:
+    - name: Validate VM host target
+      ansible.builtin.import_role:
+        name: checkhost
+      vars:
+        checkhost_target: vms
+      tags:
+        - always
+        - checkhost
+
+  roles:
+    - role: virtualization_host
+      tags:
+        - virtualization_host
+        - vms
+
+    - role: vms
+      tags:
+        - vms

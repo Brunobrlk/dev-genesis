@@ -1,0 +1,12 @@
+---
+dotfiles_profiles:
+  modern:
+    apply_base: true
+    apply_desktop: true
+    apply_display: true
+    apply_distro: true
+  minimal:
+    apply_base: true
+    apply_desktop: false
+    apply_display: false
+    apply_distro: true

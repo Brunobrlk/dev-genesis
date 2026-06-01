@@ -1,0 +1,11 @@
+---
+- name: Validate backup restore target
+  ansible.builtin.assert:
+    that:
+      - machine_profile is defined
+      - machine_profile == 'workstation'
+      - backup_source_path is defined
+      - confirm_backup_restore is defined
+      - confirm_backup_restore | bool
+    fail_msg: >-
+      Refusing to restore backup. Set backup_source_path and confirm_backup_restore=true.

@@ -1,0 +1,10 @@
+---
+machine_profile: vm_guest
+vm_name: debian-server
+vm_os: debian
+vm_profile: database_server
+vm_role: database_server
+vm_memory_mb: 4096
+vm_vcpus: 2
+vm_disk_gb: 80
+vm_graphics: false

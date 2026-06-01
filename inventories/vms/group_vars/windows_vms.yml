@@ -1,0 +1,7 @@
+---
+machine_profile: vm_guest
+vm_guest_family: windows
+ansible_connection: winrm
+ansible_user: bruno
+ansible_winrm_transport: ntlm
+ansible_winrm_server_cert_validation: ignore

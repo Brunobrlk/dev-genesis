@@ -1,0 +1,7 @@
+---
+software_remove:
+  - method: redhat/dnf
+    package: flatpak
+
+  - method: redhat/dnf
+    package: snapd

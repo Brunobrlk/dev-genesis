@@ -1,0 +1,94 @@
+---
+software_install:
+  - method: redhat/dnf
+    package: bat
+
+  - method: redhat/dnf
+    package: btop
+
+  - method: redhat/dnf
+    package: curl
+
+  - method: redhat/dnf
+    package: wget
+
+  - method: redhat/dnf
+    package: git
+
+  - method: redhat/dnf
+    package: jq
+
+  - method: redhat/dnf
+    package: make
+
+  - method: redhat/dnf
+    package: gcc
+
+  - method: redhat/dnf
+    package: unzip
+
+  - method: redhat/dnf
+    package: tar
+
+  - method: redhat/dnf
+    package: fzf
+
+  - method: redhat/dnf
+    package: ripgrep
+
+  - method: redhat/dnf
+    package: fd-find
+
+  - name: brave
+    method: redhat/rpm_repository
+    package: brave-browser
+    repo:
+      mode: repofile_url
+      filename: brave-browser.repo
+      url: https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+
+  - name: anydesk
+    method: redhat/rpm_repository
+    package: anydesk
+    repo:
+      mode: inline
+      filename: AnyDesk-Fedora.repo
+      content: |
+        [anydesk]
+        name=AnyDesk Fedora - stable
+        baseurl=http://rpm.anydesk.com/fedora/$basearch/
+        gpgcheck=1
+        repo_gpgcheck=1
+        gpgkey=https://keys.anydesk.com/repos/RPM-GPG-KEY
+
+  - name: dbeaver
+    method: redhat/github_release_rpm
+    package: dbeaver-ce
+    github_repo: dbeaver/dbeaver
+    version_prefix_to_remove: v
+    asset_pattern: dbeaver-ce-{version}-stable.x86_64.rpm
+    gpg_check: false
+
+  - name: postman
+    method: common/archive_to_opt
+    url: https://dl.pstmn.io/download/latest/linux64
+    archive_name: postman.tar.gz
+    destination: "{{ ansible_user_dir }}/opt/postman"
+    strip_components: 1
+    creates: "{{ ansible_user_dir }}/opt/postman/Postman"
+
+  - method: redhat/dnf
+    package: scrcpy
+
+  - method: redhat/dnf
+    package: starship
+
+  - method: redhat/dnf
+    package: yazi
+
+  - name: jetbrains_mono_nerdfont
+    method: common/github_release_archive
+    github_repo: ryanoasis/nerd-fonts
+    asset_pattern: JetBrainsMono.zip
+    destination: "{{ ansible_user_dir }}/.local/share/fonts/JetBrainsMono"
+    update_font_cache: true

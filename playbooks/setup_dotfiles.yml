@@ -1,0 +1,20 @@
+---
+- name: Setup dotfiles
+  hosts: workstation
+  gather_facts: true
+
+  pre_tasks:
+    - name: Validate dotfiles target
+      ansible.builtin.import_role:
+        name: checkhost
+      vars:
+        checkhost_target: dotfiles
+      tags:
+        - always
+        - checkhost
+
+  roles:
+    - role: dotfiles
+      tags:
+        - dotfiles
+        - configuration

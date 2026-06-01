@@ -1,0 +1,35 @@
+---
+- name: Load distro software install catalog
+  ansible.builtin.include_vars:
+    file: "{{ playbook_dir }}/../vars/software/{{ target_distro }}/install.yml"
+
+- name: Validate software install catalog
+  ansible.builtin.import_tasks: validate_catalog.yml
+  vars:
+    software_catalog: "{{ software_install | default([]) }}"
+    software_allowed_methods:
+      - redhat/dnf
+      - redhat/copr
+      - redhat/rpm_url
+      - redhat/rpm_repository
+      - redhat/github_release_rpm
+      - debian/apt
+      - debian/ppa
+      - debian/deb_url
+      - debian/apt_repository
+      - debian/github_release_deb
+      - common/appimage
+      - common/archive_to_opt
+      - common/archive_to_fonts
+      - common/github_release_archive
+      - common/git_repo
+      - common/remote_script
+
+- name: Install software
+  ansible.builtin.include_tasks: "install/{{ software_item.method }}.yml"
+  loop: "{{ software_install | default([]) }}"
+  loop_control:
+    loop_var: software_item
+    label: "{{ software_label }}"
+  vars:
+    software_label: "{{ software_item.package | default(software_item.packages | default('software-item')) }}"

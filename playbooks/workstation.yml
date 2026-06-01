@@ -1,0 +1,19 @@
+---
+- name: Setup developer workstation
+  hosts: workstation
+  gather_facts: true
+
+  pre_tasks:
+    - name: Validate workstation target
+      ansible.builtin.import_role:
+        name: checkhost
+      vars:
+        checkhost_target: workstation
+      tags:
+        - always
+        - checkhost
+
+  roles:
+    - role: workstation
+      tags:
+        - workstation

@@ -1,0 +1,8 @@
+---
+- name: Clone or update {{ software_label }} repository
+  ansible.builtin.git:
+    repo: "{{ software_item.repo }}"
+    dest: "{{ software_item.destination }}"
+    version: "{{ software_item.version | default('HEAD') }}"
+    update: true
+    accept_hostkey: true

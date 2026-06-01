@@ -1,0 +1,35 @@
+---
+- name: Validate RPM repository config for {{ software_label }}
+  ansible.builtin.assert:
+    that:
+      - software_item.repo is defined
+      - software_item.repo.mode in ['inline', 'repofile_url']
+      - software_item.repo.filename is defined
+    fail_msg: "{{ software_label }} requires repo.mode and repo.filename."
+
+- name: Add inline RPM repository for {{ software_label }}
+  ansible.builtin.copy:
+    dest: "/etc/yum.repos.d/{{ software_item.repo.filename }}"
+    content: "{{ software_item.repo.content }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  when: software_item.repo.mode == "inline"
+
+- name: Add RPM repository file for {{ software_label }}
+  ansible.builtin.get_url:
+    url: "{{ software_item.repo.url }}"
+    dest: "/etc/yum.repos.d/{{ software_item.repo.filename }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  when: software_item.repo.mode == "repofile_url"
+
+- name: Install {{ software_label }} from RPM repository
+  ansible.builtin.dnf:
+    name: "{{ software_item.package | default(software_item.packages) }}"
+    state: present
+    update_cache: true
+  become: true

@@ -1,0 +1,6 @@
+---
+- name: Install {{ software_label }} with apt
+  ansible.builtin.apt:
+    name: "{{ software_item.package | default(software_item.packages) }}"
+    state: present
+  become: true

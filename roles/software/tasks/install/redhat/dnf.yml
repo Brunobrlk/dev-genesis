@@ -1,0 +1,6 @@
+---
+- name: Install {{ software_label }} with dnf
+  ansible.builtin.dnf:
+    name: "{{ software_item.package | default(software_item.packages) }}"
+    state: present
+  become: true

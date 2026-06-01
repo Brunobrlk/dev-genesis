@@ -1,0 +1,7 @@
+---
+- name: Install {{ software_label }} from RPM URL
+  ansible.builtin.dnf:
+    name: "{{ software_item.url }}"
+    state: present
+    disable_gpg_check: "{{ not (software_item.gpg_check | default(true)) }}"
+  become: true

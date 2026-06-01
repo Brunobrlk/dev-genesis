@@ -1,0 +1,31 @@
+---
+- name: Remove KDE apps replaced by preferred alternatives
+  ansible.builtin.package:
+    name:
+      - dolphin
+      - kmail
+      - kontact
+      - akonadi
+      - akonadi-server
+      - akregator
+      - korganizer
+      - kaddressbook
+    state: absent
+  become: true
+
+- name: Install preferred KDE replacement apps
+  ansible.builtin.package:
+    name:
+      - nemo
+      - thunderbird
+    state: present
+  become: true
+
+- name: Remove Akonadi user data directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ ansible_user_dir }}/.local/share/akonadi"
+    - "{{ ansible_user_dir }}/.config/akonadi"
+    - "{{ ansible_user_dir }}/.cache/akonadi"

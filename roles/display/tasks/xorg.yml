@@ -1,0 +1,6 @@
+---
+- name: Install Xorg clipboard tool
+  ansible.builtin.package:
+    name: xclip
+    state: present
+  become: true

@@ -1,0 +1,7 @@
+---
+vm_profile_defaults:
+  memory_mb: 8192
+  vcpus: 4
+  disk_gb: 100
+  graphics: true
+  network: default

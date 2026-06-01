@@ -1,0 +1,20 @@
+---
+- name: Ensure destination exists for {{ software_label }}
+  ansible.builtin.file:
+    path: "{{ software_item.destination }}"
+    state: directory
+    mode: "0755"
+
+- name: Download archive for {{ software_label }}
+  ansible.builtin.get_url:
+    url: "{{ software_item.url }}"
+    dest: "/tmp/{{ software_item.archive_name }}"
+    mode: "0644"
+
+- name: Extract archive for {{ software_label }}
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ software_item.archive_name }}"
+    dest: "{{ software_item.destination }}"
+    remote_src: true
+    creates: "{{ software_item.creates | default(omit) }}"
+    extra_opts: "{{ ['--strip-components=' ~ software_item.strip_components] if software_item.strip_components is defined else omit }}"

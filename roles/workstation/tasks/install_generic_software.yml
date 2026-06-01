@@ -1,0 +1,5 @@
+---
+- name: Install generic software catalog
+  ansible.builtin.import_role:
+    name: software
+    tasks_from: install

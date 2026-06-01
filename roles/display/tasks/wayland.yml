@@ -1,0 +1,6 @@
+---
+- name: Install Wayland clipboard tool
+  ansible.builtin.package:
+    name: wl-clipboard
+    state: present
+  become: true

@@ -1,0 +1,19 @@
+---
+- name: Setup VM guests
+  hosts: linux_vms:windows_vms
+  gather_facts: true
+
+  pre_tasks:
+    - name: Validate VM guest target
+      ansible.builtin.import_role:
+        name: checkhost
+      vars:
+        checkhost_target: vm_guests
+      tags:
+        - always
+        - checkhost
+
+  roles:
+    - role: vm_guest
+      tags:
+        - vm_guest

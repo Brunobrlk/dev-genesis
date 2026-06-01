@@ -1,0 +1,23 @@
+---
+- name: Ensure font destination exists for {{ software_label }}
+  ansible.builtin.file:
+    path: "{{ software_item.destination }}"
+    state: directory
+    mode: "0755"
+
+- name: Download font archive for {{ software_label }}
+  ansible.builtin.get_url:
+    url: "{{ software_item.url }}"
+    dest: "/tmp/{{ software_item.archive_name }}"
+    mode: "0644"
+
+- name: Extract font archive for {{ software_label }}
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ software_item.archive_name }}"
+    dest: "{{ software_item.destination }}"
+    remote_src: true
+
+- name: Refresh font cache for {{ software_label }}
+  ansible.builtin.command: fc-cache -fv
+  changed_when: false
+  when: software_item.update_font_cache | default(true) | bool

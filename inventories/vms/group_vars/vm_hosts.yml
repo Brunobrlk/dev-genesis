@@ -1,0 +1,9 @@
+---
+machine_profile: vm_host
+confirm_vm_setup: false
+
+libvirt_uri: qemu:///system
+vm_storage_pool: default
+vm_network_name: default
+vm_image_dir: /var/lib/libvirt/images
+vm_iso_dir: /var/lib/libvirt/boot

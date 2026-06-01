@@ -1,0 +1,5 @@
+---
+- name: Remove {{ software_label }} opt directory
+  ansible.builtin.file:
+    path: "{{ software_item.path | default(software_item.destination) }}"
+    state: absent

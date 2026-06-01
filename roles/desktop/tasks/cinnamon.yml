@@ -1,0 +1,5 @@
+---
+- name: Cinnamon desktop-specific setup placeholder
+  ansible.builtin.debug:
+    msg: "No Cinnamon-specific workstation behavior configured yet."
+  changed_when: false

@@ -1,0 +1,4 @@
+---
+- name: Setup desktop-specific behavior
+  ansible.builtin.import_role:
+    name: desktop

@@ -1,0 +1,10 @@
+---
+machine_profile: vm_guest
+vm_name: ubuntu-server
+vm_os: ubuntu
+vm_profile: linux_server
+vm_role: api_server
+vm_memory_mb: 4096
+vm_vcpus: 2
+vm_disk_gb: 40
+vm_graphics: false

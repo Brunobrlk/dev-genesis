@@ -1,0 +1,4 @@
+---
+- name: Setup dotfiles/configuration
+  ansible.builtin.import_role:
+    name: dotfiles

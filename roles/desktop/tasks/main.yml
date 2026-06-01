@@ -1,0 +1,10 @@
+---
+- name: Validate desktop environment
+  ansible.builtin.assert:
+    that:
+      - desktop_environment is defined
+      - desktop_environment in ['gnome', 'kde', 'cinnamon']
+    fail_msg: "desktop_environment must be one of: gnome, kde, cinnamon."
+
+- name: Run desktop-specific tasks
+  ansible.builtin.include_tasks: "{{ desktop_environment }}.yml"

@@ -1,0 +1,34 @@
+---
+- name: Check installed DEB version for {{ software_label }}
+  ansible.builtin.command:
+    cmd: "dpkg-query -W -f='${Version}' {{ software_item.package }}"
+  register: github_deb_installed_version
+  changed_when: false
+  failed_when: false
+
+- name: Fetch latest GitHub release for {{ software_label }}
+  ansible.builtin.uri:
+    url: "https://api.github.com/repos/{{ software_item.github_repo }}/releases/latest"
+    return_content: true
+  register: github_deb_latest_release
+  changed_when: false
+
+- name: Resolve GitHub DEB release values for {{ software_label }}
+  ansible.builtin.set_fact:
+    github_deb_installed_version_value: >-
+      {{ github_deb_installed_version.stdout if github_deb_installed_version.rc == 0 else 'none' }}
+    github_deb_latest_tag_value: "{{ github_deb_latest_release.json.tag_name }}"
+    github_deb_latest_version_value: >-
+      {{ github_deb_latest_release.json.tag_name | regex_replace('^' ~ (software_item.version_prefix_to_remove | default('')), '') }}
+
+- name: Resolve GitHub DEB download URL for {{ software_label }}
+  ansible.builtin.set_fact:
+    github_deb_download_url: >-
+      https://github.com/{{ software_item.github_repo }}/releases/download/{{ github_deb_latest_tag_value }}/{{ software_item.asset_pattern | replace('{version}', github_deb_latest_version_value) }}
+
+- name: Install or upgrade {{ software_label }} from GitHub release DEB
+  ansible.builtin.apt:
+    deb: "{{ github_deb_download_url }}"
+    state: present
+  become: true
+  when: github_deb_installed_version_value != github_deb_latest_version_value

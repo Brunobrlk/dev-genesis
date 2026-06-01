@@ -1,0 +1,10 @@
+---
+- name: Validate checkhost target value
+  ansible.builtin.assert:
+    that:
+      - checkhost_target is defined
+      - checkhost_target in ['workstation', 'dotfiles', 'backup_restore', 'nvidia', 'vms', 'vm_guests']
+    fail_msg: "checkhost_target must be one of: workstation, dotfiles, backup_restore, nvidia, vms, vm_guests."
+
+- name: Run target-specific host checks
+  ansible.builtin.include_tasks: "{{ checkhost_target }}.yml"

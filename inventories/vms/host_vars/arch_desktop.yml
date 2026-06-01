@@ -1,0 +1,10 @@
+---
+machine_profile: vm_guest
+vm_name: arch-desktop
+vm_os: arch
+vm_profile: linux_desktop
+vm_role: desktop_testing
+vm_memory_mb: 4096
+vm_vcpus: 2
+vm_disk_gb: 60
+vm_graphics: true

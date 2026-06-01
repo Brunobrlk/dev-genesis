@@ -1,0 +1,23 @@
+---
+- name: Validate software catalog is a list
+  ansible.builtin.assert:
+    that:
+      - software_catalog | type_debug == "list"
+    fail_msg: "Software catalog must be a list."
+
+- name: Validate software catalog items
+  ansible.builtin.assert:
+    that:
+      - software_item | type_debug == "dict"
+      - software_item.method is defined
+      - software_item.method in software_allowed_methods
+      - software_item.package is defined or software_item.packages is defined or software_item.name is defined or software_item.url is defined or software_item.repo is defined or software_item.destination is defined or software_item.path is defined
+    fail_msg: >-
+      Invalid software item.
+      Each item must define method and at least one identifier:
+      package, packages, name, url, repo, destination, or path.
+      Item: {{ software_item | to_nice_yaml }}
+  loop: "{{ software_catalog }}"
+  loop_control:
+    loop_var: software_item
+    label: "{{ software_item.package | default(software_item.packages | default('missing-label')) }}"

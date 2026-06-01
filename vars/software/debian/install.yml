@@ -1,0 +1,55 @@
+---
+software_install:
+  - method: debian/apt
+    package: bat
+
+  - method: debian/apt
+    package: btop
+
+  - method: debian/apt
+    package: curl
+
+  - method: debian/apt
+    package: wget
+
+  - method: debian/apt
+    package: git
+
+  - method: debian/apt
+    package: jq
+
+  - method: debian/apt
+    package: make
+
+  - method: debian/apt
+    package: gcc
+
+  - method: debian/apt
+    package: unzip
+
+  - method: debian/apt
+    package: tar
+
+  - method: debian/apt
+    package: fzf
+
+  - method: debian/apt
+    package: ripgrep
+
+  - method: debian/apt
+    package: fd-find
+
+  - name: postman
+    method: common/archive_to_opt
+    url: https://dl.pstmn.io/download/latest/linux64
+    archive_name: postman.tar.gz
+    destination: "{{ ansible_user_dir }}/opt/postman"
+    strip_components: 1
+    creates: "{{ ansible_user_dir }}/opt/postman/Postman"
+
+  - name: jetbrains_mono_nerdfont
+    method: common/github_release_archive
+    github_repo: ryanoasis/nerd-fonts
+    asset_pattern: JetBrainsMono.zip
+    destination: "{{ ansible_user_dir }}/.local/share/fonts/JetBrainsMono"
+    update_font_cache: true

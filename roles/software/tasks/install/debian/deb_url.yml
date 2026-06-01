@@ -1,0 +1,6 @@
+---
+- name: Install {{ software_label }} from DEB URL
+  ansible.builtin.apt:
+    deb: "{{ software_item.url }}"
+    state: present
+  become: true

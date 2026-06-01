@@ -1,0 +1,5 @@
+---
+- name: GNOME desktop-specific setup placeholder
+  ansible.builtin.debug:
+    msg: "No GNOME-specific workstation behavior configured yet."
+  changed_when: false

@@ -1,0 +1,19 @@
+---
+- name: Setup NVIDIA
+  hosts: workstation
+  gather_facts: true
+
+  pre_tasks:
+    - name: Validate NVIDIA target
+      ansible.builtin.import_role:
+        name: checkhost
+      vars:
+        checkhost_target: nvidia
+      tags:
+        - always
+        - checkhost
+
+  roles:
+    - role: nvidia
+      tags:
+        - nvidia

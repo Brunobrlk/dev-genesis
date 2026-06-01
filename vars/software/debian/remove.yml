@@ -1,0 +1,7 @@
+---
+software_remove:
+  - method: debian/apt
+    package: snapd
+
+  - method: debian/apt
+    package: flatpak

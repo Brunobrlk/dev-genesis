@@ -1,0 +1,10 @@
+---
+- name: Validate VM guest target
+  ansible.builtin.assert:
+    that:
+      - machine_profile is defined
+      - machine_profile == 'vm_guest'
+      - vm_name is defined
+      - vm_os is defined
+      - vm_profile is defined
+    fail_msg: "Refusing to configure VM guest. Configure vm_name, vm_os, and vm_profile."

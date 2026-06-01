@@ -1,0 +1,7 @@
+---
+fedora_dnf_config:
+  fastestmirror: true
+  max_parallel_downloads: 10
+  defaultyes: true
+debian_apt_mirror: ""
+debian_apt_preferences: []

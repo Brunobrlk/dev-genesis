@@ -1,0 +1,10 @@
+---
+- name: Validate display server
+  ansible.builtin.assert:
+    that:
+      - display_server is defined
+      - display_server in ['xorg', 'wayland']
+    fail_msg: "display_server must be one of: xorg, wayland."
+
+- name: Run display-server-specific tasks
+  ansible.builtin.include_tasks: "{{ display_server }}.yml"

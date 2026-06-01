@@ -1,0 +1,11 @@
+---
+- name: Download remote installer for {{ software_label }}
+  ansible.builtin.get_url:
+    url: "{{ software_item.url }}"
+    dest: "/tmp/{{ software_label | regex_replace('[^A-Za-z0-9_.-]', '_') }}-installer.sh"
+    mode: "0755"
+
+- name: Run remote installer for {{ software_label }}
+  ansible.builtin.command:
+    cmd: "bash /tmp/{{ software_label | regex_replace('[^A-Za-z0-9_.-]', '_') }}-installer.sh {{ software_item.args | default('') }}"
+    creates: "{{ software_item.creates | default(omit) }}"

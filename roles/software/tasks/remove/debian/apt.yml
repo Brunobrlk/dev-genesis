@@ -1,0 +1,7 @@
+---
+- name: Remove {{ software_label }} with apt
+  ansible.builtin.apt:
+    name: "{{ software_item.package | default(software_item.packages) }}"
+    state: absent
+    purge: "{{ software_item.purge | default(false) }}"
+  become: true

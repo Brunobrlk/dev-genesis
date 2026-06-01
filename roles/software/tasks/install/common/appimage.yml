@@ -1,0 +1,12 @@
+---
+- name: Ensure AppImage directory exists
+  ansible.builtin.file:
+    path: "{{ software_item.destination | default(ansible_user_dir + '/opt/appimages') }}"
+    state: directory
+    mode: "0755"
+
+- name: Download {{ software_label }} AppImage
+  ansible.builtin.get_url:
+    url: "{{ software_item.url }}"
+    dest: "{{ software_item.destination | default(ansible_user_dir + '/opt/appimages') }}/{{ software_item.filename }}"
+    mode: "0755"

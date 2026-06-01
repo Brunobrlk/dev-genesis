@@ -1,0 +1,6 @@
+---
+optimize_disabled_services:
+  - bluetooth.service
+  - cups.service
+  - ModemManager.service
+optimize_masked_services: []

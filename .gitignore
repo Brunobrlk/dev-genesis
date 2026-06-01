@@ -1,0 +1,28 @@
+# Ansible
+*.retry
+.ansible/
+
+# Python/tooling
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Secrets / private data
+vault/*.yml
+!vault/*.example
+!vault/.gitkeep
+*.vault.yml
+*.secret.yml
+*.pem
+*.key
+*.kdbx
+
+# Local/private inventories
+inventories/**/host_vars/*_private.yml
+inventories/**/group_vars/*_private.yml
+
+# Editor/OS
+.idea/
+.vscode/
+.DS_Store
