@@ -1,0 +1,11 @@
+---
+- name: Create restore destination for {{ item.name }}
+  ansible.builtin.file:
+    path: "{{ item.local }}"
+    state: directory
+    mode: "{{ item.mode | default('0755') }}"
+
+- name: Restore {{ item.name }}
+  ansible.builtin.command:
+    argv: "{{ ['rsync', '-a', '--human-readable'] + (item.rsync_options | default([])) + [item.backup, item.local] }}"
+  changed_when: true

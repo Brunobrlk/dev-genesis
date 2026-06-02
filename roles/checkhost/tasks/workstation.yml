@@ -1,32 +1,10 @@
 ---
-- name: Validate workstation identity
+- name: Validate common workstation values
+  ansible.builtin.import_tasks: common_workstation.yml
+
+- name: Validate workstation setup confirmation
   ansible.builtin.assert:
     that:
-      - machine_profile is defined
-      - machine_profile == 'workstation'
-      - target_distro is defined
-      - target_distro in ['fedora', 'debian']
-      - desktop_environment is defined
-      - desktop_environment in ['gnome', 'kde', 'cinnamon']
-      - display_server is defined
-      - display_server in ['xorg', 'wayland']
-      - dotfiles_profile is defined
       - confirm_workstation_setup is defined
       - confirm_workstation_setup | bool
-    fail_msg: >-
-      Refusing to run workstation setup. Configure machine_profile, target_distro,
-      desktop_environment, display_server, dotfiles_profile, and confirm_workstation_setup.
-
-- name: Validate Fedora target matches detected distro
-  ansible.builtin.assert:
-    that:
-      - ansible_facts['distribution'] == 'Fedora'
-    fail_msg: "target_distro=fedora, but detected {{ ansible_facts['distribution'] }}."
-  when: target_distro == 'fedora'
-
-- name: Validate Debian target matches detected OS family
-  ansible.builtin.assert:
-    that:
-      - ansible_facts['os_family'] == 'Debian'
-    fail_msg: "target_distro=debian, but detected os_family={{ ansible_facts['os_family'] }}."
-  when: target_distro == 'debian'
+    fail_msg: "Refusing to run workstation setup. Set confirm_workstation_setup=true."

@@ -1,0 +1,33 @@
+---
+- name: Validate common workstation values
+  ansible.builtin.import_tasks: common_workstation.yml
+
+- name: Validate restore configuration
+  ansible.builtin.assert:
+    that:
+      - backup_restore_external_drive_mount is defined
+      - backup_restore_external_drive_mount is string
+      - backup_restore_external_drive_mount | length > 0
+      - backup_restore_source_name is defined
+      - backup_restore_source_name is string
+      - backup_restore_source_name | length > 0
+      - backup_restore_source_path is defined
+      - backup_restore_source_path is string
+      - backup_restore_source_path | length > 0
+      - confirm_restore is defined
+      - confirm_restore | bool
+    fail_msg: >-
+      Refusing to run restore. Configure backup_restore_external_drive_mount,
+      backup_restore_source_name, backup_restore_source_path, and confirm_restore=true.
+
+- name: Check restore source root
+  ansible.builtin.stat:
+    path: "{{ backup_restore_source_path }}"
+  register: restore_source_stat
+
+- name: Validate restore source root
+  ansible.builtin.assert:
+    that:
+      - restore_source_stat.stat.exists
+      - restore_source_stat.stat.isdir
+    fail_msg: "Restore source root does not exist: {{ backup_restore_source_path }}"

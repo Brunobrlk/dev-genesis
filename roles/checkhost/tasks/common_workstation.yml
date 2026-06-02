@@ -1,0 +1,29 @@
+---
+- name: Validate workstation identity
+  ansible.builtin.assert:
+    that:
+      - machine_profile is defined
+      - machine_profile == 'workstation'
+      - target_distro is defined
+      - target_distro in ['fedora', 'debian']
+      - desktop_environment is defined
+      - desktop_environment in ['gnome', 'kde', 'cinnamon']
+      - display_server is defined
+      - display_server in ['xorg', 'wayland']
+    fail_msg: >-
+      Invalid workstation target. Configure machine_profile=workstation,
+      target_distro, desktop_environment, and display_server.
+
+- name: Validate Fedora target matches detected distro
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['distribution'] == 'Fedora'
+    fail_msg: "target_distro=fedora, but detected {{ ansible_facts['distribution'] }}."
+  when: target_distro == 'fedora'
+
+- name: Validate Debian target matches detected OS family
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['os_family'] == 'Debian'
+    fail_msg: "target_distro=debian, but detected os_family={{ ansible_facts['os_family'] }}."
+  when: target_distro == 'debian'

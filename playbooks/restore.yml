@@ -1,16 +1,16 @@
 ---
-- name: Setup dotfiles
+- name: Restore workstation data
   hosts: workstation
   gather_facts: true
 
   pre_tasks:
-    - name: Validate dotfiles target
+    - name: Validate restore target
       ansible.builtin.import_role:
         name: checkhost
       vars:
-        checkhost_target: dotfiles
+        checkhost_target: restore
       tags: [ always, checkhost ]
 
   roles:
-    - role: dotfiles
-      tags: [ dotfiles ]
+    - role: restore
+      tags: [ restore ]

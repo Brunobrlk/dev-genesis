@@ -1,16 +1,18 @@
 ---
-- name: Validate dotfiles target
+- name: Validate common workstation values
+  ansible.builtin.import_tasks: common_workstation.yml
+
+- name: Validate dotfiles setup configuration
   ansible.builtin.assert:
     that:
-      - machine_profile is defined
-      - machine_profile == 'workstation'
-      - target_distro is defined
-      - target_distro in ['fedora', 'debian']
-      - desktop_environment is defined
-      - desktop_environment in ['gnome', 'kde', 'cinnamon']
-      - display_server is defined
-      - display_server in ['xorg', 'wayland']
       - dotfiles_profile is defined
+      - dotfiles_profile is string
+      - dotfiles_profile | length > 0
+      - dotfiles_repo_url is defined
+      - dotfiles_repo_url is string
+      - dotfiles_repo_url | length > 0
       - confirm_dotfiles_setup is defined
       - confirm_dotfiles_setup | bool
-    fail_msg: "Refusing to run dotfiles setup. Configure explicit target values and confirm_dotfiles_setup."
+    fail_msg: >-
+      Refusing to run dotfiles setup. Configure dotfiles_profile,
+      dotfiles_repo_url, and confirm_dotfiles_setup=true.

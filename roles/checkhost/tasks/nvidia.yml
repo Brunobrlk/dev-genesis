@@ -1,11 +1,10 @@
 ---
+- name: Validate common workstation values
+  ansible.builtin.import_tasks: common_workstation.yml
+
 - name: Validate NVIDIA target
   ansible.builtin.assert:
     that:
-      - machine_profile is defined
-      - machine_profile == 'workstation'
-      - target_distro is defined
-      - target_distro in ['fedora', 'debian']
       - confirm_nvidia_setup is defined
       - confirm_nvidia_setup | bool
     fail_msg: "Refusing to setup NVIDIA. Set confirm_nvidia_setup=true for this workstation."

@@ -6,4 +6,4 @@
       - machine_profile == 'vm_host'
       - confirm_vm_setup is defined
       - confirm_vm_setup | bool
-    fail_msg: "Refusing to setup VMs. Set confirm_vm_setup=true on the VM host."
+    fail_msg: "Refusing to setup VMs. Set machine_profile=vm_host and confirm_vm_setup=true."

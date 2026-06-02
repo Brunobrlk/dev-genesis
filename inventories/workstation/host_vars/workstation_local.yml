@@ -2,18 +2,18 @@
 machine_profile: workstation
 
 target_distro: fedora
-desktop_environment: cinnamon
-display_server: xorg
+desktop_environment: kde
+display_server: wayland
 dotfiles_profile: modern
 
 confirm_workstation_setup: true
 confirm_dotfiles_setup: true
-confirm_backup_restore: false
+confirm_backup: false
+confirm_restore: false
 confirm_nvidia_setup: false
 
-backup_external_drive_mount: /run/media/{{ ansible_user_id }}/ExternalDrive
-backup_source_name: backup-latest
-backup_source_path: "{{ backup_external_drive_mount }}/{{ backup_source_name }}"
+dotfiles_repo_url: "https://github.com/Brunobrlk/dotfiles.git"
 
-dotfiles_repo_url: "git@github.com:brunobrlk/dotfiles.git"
-dotfiles_repo_dest: "{{ ansible_user_dir }}/.local/share/dev-genesis/dotfiles"
+backup_restore_external_drive_mount: "/run/media/{{ ansible_user_id }}/Bruno"
+backup_restore_source_name: backup-latest
+backup_restore_source_path: "{{ backup_restore_external_drive_mount }}/{{ backup_restore_source_name }}"

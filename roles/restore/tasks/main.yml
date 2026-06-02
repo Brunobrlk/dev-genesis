@@ -1,0 +1,19 @@
+---
+- name: Install restore dependencies
+  ansible.builtin.include_role:
+    name: software
+    tasks_from: api_install_many
+  vars:
+    software_items: "{{ restore_dependencies }}"
+
+- name: Load backup/restore catalog
+  ansible.builtin.include_vars:
+    file: "{{ backup_restore_catalog_file }}"
+
+- name: Restore items
+  ansible.builtin.include_tasks: item.yml
+  loop: "{{ items | default([]) }}"
+  loop_control:
+    loop_var: item
+    label: "{{ item.name | default(item.local | default('restore-item')) }}"
+  when: item.enabled | default(true) | bool

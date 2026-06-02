@@ -1,0 +1,11 @@
+---
+- name: Create backup destination for {{ item.name }}
+  ansible.builtin.file:
+    path: "{{ item.backup }}"
+    state: directory
+    mode: "{{ item.mode | default('0755') }}"
+
+- name: Backup {{ item.name }}
+  ansible.builtin.command:
+    argv: "{{ ['rsync', '-a', '--human-readable'] + (item.rsync_options | default([])) + [item.local, item.backup] }}"
+  changed_when: true

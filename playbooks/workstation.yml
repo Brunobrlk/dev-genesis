@@ -9,9 +9,7 @@
         name: checkhost
       vars:
         checkhost_target: workstation
-      tags:
-        - always
-        - checkhost
+      tags: [ always, checkhost ]
 
   roles:
     - role: software
@@ -19,6 +17,9 @@
 
     - role: folders
       tags: [ workstation, folders ]
+
+    - role: dotfiles
+      tags: [ workstation, dotfiles ]
 
     - role: desktop
       tags: [ workstation, desktop ]

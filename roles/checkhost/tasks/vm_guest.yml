@@ -7,4 +7,4 @@
       - vm_name is defined
       - vm_os is defined
       - vm_profile is defined
-    fail_msg: "Refusing to configure VM guest. Configure vm_name, vm_os, and vm_profile."
+    fail_msg: "Refusing to configure VM guest. Configure machine_profile=vm_guest, vm_name, vm_os, and vm_profile."

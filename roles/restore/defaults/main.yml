@@ -1,0 +1,10 @@
+---
+backup_restore_catalog_file: "{{ playbook_dir }}/../vars/backup_restore/workstation.yml"
+
+restore_confirm: "{{ confirm_restore | default(false) }}"
+
+restore_dependencies:
+  - name: restore-dependencies
+    method: common/package
+    packages:
+      - rsync

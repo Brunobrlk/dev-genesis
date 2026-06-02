@@ -1,5 +1,4 @@
 ---
-dotfiles_repo_url: "https://github.com/Brunobrlk/dotfiles.git"
 dotfiles_repo_dest: "{{ ansible_user_dir }}/.cache/dev-genesis/dotfiles"
 dotfiles_repo_version: master
 

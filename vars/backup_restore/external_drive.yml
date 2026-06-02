@@ -1,4 +1,0 @@
----
-backup_external_drive_mount: /run/media/{{ ansible_user_id }}/ExternalDrive
-backup_source_name: backup-latest
-backup_source_path: "{{ backup_external_drive_mount }}/{{ backup_source_name }}"
