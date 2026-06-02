@@ -1,0 +1,6 @@
+---
+mise_install:
+  - name: mise
+    method: redhat/copr
+    copr: jdxcode/mise
+    package: mise

@@ -14,6 +14,26 @@
         - checkhost
 
   roles:
-    - role: workstation
-      tags:
-        - workstation
+    - role: software
+      tags: [ workstation, software ]
+
+    - role: folders
+      tags: [ workstation, folders ]
+
+    - role: desktop
+      tags: [ workstation, desktop ]
+
+    - role: display
+      tags: [ workstation, display ]
+
+    - role: optimize
+      tags: [ workstation, optimize ]
+
+    - role: mise
+      tags: [ workstation, mise ]
+
+    - role: tmux
+      tags: [ workstation, tmux ]
+
+    - role: docker
+      tags: [ workstation, docker ]

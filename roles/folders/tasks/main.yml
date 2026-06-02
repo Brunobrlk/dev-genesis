@@ -1,0 +1,42 @@
+---
+- name: Load folders catalog
+  ansible.builtin.include_vars:
+    file: "{{ folders_catalog_file }}"
+    name: folders_catalog
+  when: folders_directories | length == 0
+
+- name: Resolve folder list
+  ansible.builtin.set_fact:
+    folders_effective_directories: >-
+      {{
+        folders_directories
+        if folders_directories | length > 0
+        else folders_catalog.workstation_directories | default([])
+      }}
+
+- name: Validate folder list
+  ansible.builtin.assert:
+    that:
+      - folders_effective_directories is iterable
+      - folders_effective_directories is not string
+    fail_msg: "folders_directories or workstation_directories must be a list."
+
+- name: Validate folder items
+  ansible.builtin.assert:
+    that:
+      - item.path is defined
+      - item.path is string
+      - item.path | length > 0
+    fail_msg: "Each folder item must define a non-empty path."
+  loop: "{{ folders_effective_directories }}"
+  loop_control:
+    label: "{{ item.path | default('missing-path') }}"
+
+- name: Create folders
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "{{ item.mode | default('0755') }}"
+  loop: "{{ folders_effective_directories }}"
+  loop_control:
+    label: "{{ item.path }}"

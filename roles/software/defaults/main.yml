@@ -1,0 +1,26 @@
+---
+software_install_allowed_methods:
+  - redhat/dnf
+  - redhat/copr
+  - redhat/rpm_url
+  - redhat/rpm_repository
+  - redhat/github_release_rpm
+  - debian/apt
+  - debian/ppa
+  - debian/deb_url
+  - debian/apt_repository
+  - debian/github_release_deb
+  - common/package
+  - common/appimage
+  - common/archive_to_opt
+  - common/archive_to_fonts
+  - common/github_release_archive
+  - common/git_repo
+  - common/remote_script
+
+software_remove_allowed_methods:
+  - redhat/dnf
+  - debian/apt
+  - common/package
+  - common/appimage
+  - common/archive_to_opt

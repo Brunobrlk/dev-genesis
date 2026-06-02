@@ -1,0 +1,24 @@
+---
+- name: Assert mise role supports Linux
+  ansible.builtin.assert:
+    that:
+      - ansible_system == "Linux"
+      - target_distro is defined
+      - target_distro is string
+      - target_distro | length > 0
+    fail_msg: "The mise role requires Linux and a valid target_distro."
+
+- name: Load mise distro variables
+  ansible.builtin.include_vars:
+    file: "{{ playbook_dir }}/../vars/mise/{{ target_distro }}.yml"
+
+- name: Install mise through software role
+  ansible.builtin.include_role:
+    name: software
+    tasks_from: api_install_many
+  vars:
+    software_items: "{{ mise_install }}"
+
+- name: Configure mise for bash
+  ansible.builtin.include_tasks: bash.yml
+  when: mise_configure_bash | bool

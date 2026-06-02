@@ -1,0 +1,15 @@
+---
+- name: Validate software remove catalog
+  ansible.builtin.import_tasks: validate_catalog.yml
+  vars:
+    software_catalog: "{{ software_items | default([]) }}"
+    software_allowed_methods: "{{ software_remove_allowed_methods }}"
+
+- name: Remove software
+  ansible.builtin.include_tasks: api_remove_one.yml
+  loop: "{{ software_items | default([]) }}"
+  loop_control:
+    loop_var: software_item
+    label: "{{ software_label }}"
+  vars:
+    software_label: "{{ software_item.name | default(software_item.package | default(software_item.packages | default('software-item'))) }}"

@@ -1,0 +1,55 @@
+---
+- name: Assert tmux role supports Linux
+  ansible.builtin.assert:
+    that:
+      - ansible_system == "Linux"
+      - target_distro is defined
+      - target_distro is string
+      - target_distro | length > 0
+    fail_msg: "The tmux role requires Linux and a valid target_distro."
+
+- name: Load tmux distro variables
+  ansible.builtin.include_vars:
+    file: "{{ playbook_dir }}/../vars/tmux/{{ target_distro }}.yml"
+
+- name: Install tmux through software role
+  ansible.builtin.include_role:
+    name: software
+    tasks_from: api_install_many
+  vars:
+    software_items: "{{ tmux_install }}"
+
+- name: Ensure tmux plugin directory exists
+  ansible.builtin.file:
+    path: "{{ tmux_plugins_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Clone TPM
+  ansible.builtin.git:
+    repo: "{{ tmux_tpm_repo }}"
+    dest: "{{ tmux_tpm_dir }}"
+    version: "{{ tmux_tpm_version }}"
+    update: true
+  when: tmux_tpm_enabled | bool
+
+- name: Ensure Catppuccin parent directory exists
+  ansible.builtin.file:
+    path: "{{ tmux_catppuccin_dir | dirname }}"
+    state: directory
+    mode: "0755"
+  when: tmux_catppuccin_enabled | bool
+
+- name: Clone Catppuccin tmux theme
+  ansible.builtin.git:
+    repo: "{{ tmux_catppuccin_repo }}"
+    dest: "{{ tmux_catppuccin_dir }}"
+    version: "{{ tmux_catppuccin_version }}"
+    update: true
+  when: tmux_catppuccin_enabled | bool
+
+- name: Show tmux plugin install hint
+  ansible.builtin.debug:
+    msg:
+      - "TPM is available at: {{ tmux_tpm_dir }}"
+      - "After your tmux config lists plugins, run prefix + I inside tmux to install them."

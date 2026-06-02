@@ -1,0 +1,15 @@
+---
+mise_configure_bash: true
+mise_install_bash_completion: true
+mise_install_usage_for_completion: true
+mise_force_regenerate_completion: false
+
+mise_bashrc_path: "{{ ansible_user_dir }}/.bashrc"
+mise_bash_completion_dir: "{{ ansible_user_dir }}/.local/share/bash-completion/completions"
+mise_bash_completion_file: "{{ mise_bash_completion_dir }}/mise"
+
+mise_path:
+  - /usr/local/bin
+  - /usr/bin
+  - /bin
+  - "{{ ansible_user_dir }}/.local/bin"

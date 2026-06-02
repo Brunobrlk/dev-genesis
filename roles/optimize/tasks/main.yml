@@ -1,0 +1,17 @@
+---
+- name: Assert optimize role supports Linux
+  ansible.builtin.assert:
+    that:
+      - ansible_system == "Linux"
+    fail_msg: "The optimize role currently supports Linux only."
+
+- name: Set swappiness
+  become: true
+  ansible.posix.sysctl:
+    name: vm.swappiness
+    value: "{{ optimize_swappiness_value }}"
+    state: present
+    sysctl_file: "{{ optimize_sysctl_file }}"
+    sysctl_set: true
+    reload: true
+  when: optimize_swappiness_enabled | bool

@@ -1,0 +1,34 @@
+---
+docker_supported_distribution: Fedora
+
+docker_remove_conflicting_packages: true
+
+docker_conflicting_packages:
+  - docker
+  - docker-client
+  - docker-client-latest
+  - docker-common
+  - docker-latest
+  - docker-latest-logrotate
+  - docker-logrotate
+  - docker-selinux
+  - docker-engine-selinux
+  - docker-engine
+
+docker_repo_url: https://download.docker.com/linux/fedora/docker-ce.repo
+docker_repo_dest: /etc/yum.repos.d/docker-ce.repo
+
+docker_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+
+docker_service_name: docker
+docker_group_name: docker
+docker_enable_service: true
+docker_start_service: true
+
+docker_add_user_to_group: true
+docker_user: "{{ ansible_user_id }}"

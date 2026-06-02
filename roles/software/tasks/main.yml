@@ -1,0 +1,8 @@
+---
+- name: Remove unwanted software catalog
+  ansible.builtin.import_tasks: remove.yml
+  tags: [ software, remove_software ]
+
+- name: Install software catalog
+  ansible.builtin.import_tasks: install.yml
+  tags: [ software, install_software ]

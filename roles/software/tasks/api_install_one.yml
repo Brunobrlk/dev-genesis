@@ -1,0 +1,18 @@
+---
+- name: Validate software install item
+  ansible.builtin.assert:
+    that:
+      - software_item is defined
+      - software_item is mapping
+      - software_item.method is defined
+      - software_item.method is string
+      - software_item.method in software_install_allowed_methods
+    fail_msg: >-
+      Invalid software install item.
+      Each item must define a valid method.
+      Allowed methods: {{ software_install_allowed_methods | join(', ') }}
+
+- name: Install software
+  ansible.builtin.include_tasks: "install/{{ software_item.method }}.yml"
+  vars:
+    software_label: "{{ software_item.name | default(software_item.package | default(software_item.packages | default('software-item'))) }}"

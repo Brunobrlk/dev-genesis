@@ -1,0 +1,60 @@
+---
+- name: Add mise activation to bashrc
+  ansible.builtin.blockinfile:
+    path: "{{ mise_bashrc_path }}"
+    create: true
+    mode: "0644"
+    marker: "# {mark} dev-genesis mise"
+    block: |
+      if command -v mise >/dev/null 2>&1; then
+        eval "$(mise activate bash)"
+      fi
+
+- name: Ensure bash completion directory exists
+  ansible.builtin.file:
+    path: "{{ mise_bash_completion_dir }}"
+    state: directory
+    mode: "0755"
+  when: mise_install_bash_completion | bool
+
+- name: Check whether usage is installed by mise
+  ansible.builtin.command:
+    cmd: mise where usage
+  environment:
+    PATH: "{{ mise_path | join(':') }}"
+  register: mise_usage_check
+  changed_when: false
+  failed_when: false
+  when:
+    - mise_install_bash_completion | bool
+    - mise_install_usage_for_completion | bool
+
+- name: Install usage for mise completions
+  ansible.builtin.command:
+    cmd: mise use -g usage
+  environment:
+    PATH: "{{ mise_path | join(':') }}"
+  changed_when: true
+  when:
+    - mise_install_bash_completion | bool
+    - mise_install_usage_for_completion | bool
+    - mise_usage_check.rc != 0
+
+- name: Check whether mise bash completion already exists
+  ansible.builtin.stat:
+    path: "{{ mise_bash_completion_file }}"
+  register: mise_bash_completion_stat
+  when: mise_install_bash_completion | bool
+
+- name: Generate mise bash completion
+  ansible.builtin.shell: >
+    mise completion bash --include-bash-completion-lib
+    > {{ mise_bash_completion_file | quote }}
+  args:
+    executable: /bin/bash
+  environment:
+    PATH: "{{ mise_path | join(':') }}"
+  changed_when: true
+  when:
+    - mise_install_bash_completion | bool
+    - mise_force_regenerate_completion | bool or not mise_bash_completion_stat.stat.exists

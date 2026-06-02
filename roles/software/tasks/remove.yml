@@ -3,21 +3,7 @@
   ansible.builtin.include_vars:
     file: "{{ playbook_dir }}/../vars/software/{{ target_distro }}/remove.yml"
 
-- name: Validate software remove catalog
-  ansible.builtin.import_tasks: validate_catalog.yml
+- name: Remove software catalog
+  ansible.builtin.include_tasks: api_remove_many.yml
   vars:
-    software_catalog: "{{ software_remove | default([]) }}"
-    software_allowed_methods:
-      - redhat/dnf
-      - debian/apt
-      - common/appimage
-      - common/archive_to_opt
-
-- name: Remove software
-  ansible.builtin.include_tasks: "remove/{{ software_item.method }}.yml"
-  loop: "{{ software_remove | default([]) }}"
-  loop_control:
-    loop_var: software_item
-    label: "{{ software_label }}"
-  vars:
-    software_label: "{{ software_item.package | default(software_item.packages | default('software-item')) }}"
+    software_items: "{{ software_remove | default([]) }}"

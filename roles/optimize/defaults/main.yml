@@ -1,0 +1,4 @@
+---
+optimize_swappiness_enabled: true
+optimize_swappiness_value: "10"
+optimize_sysctl_file: /etc/sysctl.d/99-dev-genesis.conf

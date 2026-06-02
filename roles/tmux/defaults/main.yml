@@ -1,0 +1,13 @@
+---
+tmux_config_home: "{{ ansible_user_dir }}/.config/tmux"
+tmux_plugins_dir: "{{ tmux_config_home }}/plugins"
+
+tmux_tpm_enabled: true
+tmux_tpm_repo: https://github.com/tmux-plugins/tpm.git
+tmux_tpm_dir: "{{ tmux_plugins_dir }}/tpm"
+tmux_tpm_version: master
+
+tmux_catppuccin_enabled: true
+tmux_catppuccin_repo: https://github.com/catppuccin/tmux.git
+tmux_catppuccin_dir: "{{ tmux_plugins_dir }}/catppuccin/tmux"
+tmux_catppuccin_version: main

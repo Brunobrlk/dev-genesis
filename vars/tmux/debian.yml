@@ -1,0 +1,8 @@
+---
+tmux_install:
+  - name: tmux
+    method: common/package
+    packages:
+      - tmux
+      - git
+      - bash

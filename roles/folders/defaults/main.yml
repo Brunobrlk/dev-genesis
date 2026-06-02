@@ -1,0 +1,5 @@
+---
+folders_catalog_file: "{{ playbook_dir }}/../vars/folders/workstation.yml"
+
+# Allows another playbook/role to bypass the catalog file and pass folders directly.
+folders_directories: []
