@@ -1,0 +1,26 @@
+---
+- name: Install dotfiles dependencies
+  ansible.builtin.include_role:
+    name: software
+    tasks_from: api_install_many
+  vars:
+    software_items: "{{ dotfiles_dependencies }}"
+
+- name: Clone dotfiles repository
+  ansible.builtin.git:
+    repo: "{{ dotfiles_repo_url }}"
+    dest: "{{ dotfiles_repo_dest }}"
+    version: "{{ dotfiles_repo_version }}"
+    update: true
+    depth: 1
+
+- name: Run dotfiles installer
+  ansible.builtin.command:
+    argv:
+      - bash
+      - install.sh
+    chdir: "{{ dotfiles_repo_dest }}"
+  environment:
+    XDG_CURRENT_DESKTOP: "{{ ansible_env.XDG_CURRENT_DESKTOP | default('') }}"
+    XDG_SESSION_TYPE: "{{ ansible_env.XDG_SESSION_TYPE | default('') }}"
+  changed_when: true

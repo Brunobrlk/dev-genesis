@@ -1,4 +1,0 @@
----
-dotfiles_repo_url: "git@github.com:brunobrlk/dotfiles.git"
-dotfiles_repo_dest: "{{ ansible_user_dir }}/.local/share/dev-genesis/dotfiles"
-dotfiles_apply_mode: copy
