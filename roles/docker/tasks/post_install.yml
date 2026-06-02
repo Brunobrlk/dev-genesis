@@ -1,0 +1,26 @@
+---
+- name: Ensure docker group exists
+  become: true
+  ansible.builtin.group:
+    name: "{{ docker_group_name }}"
+    state: present
+
+- name: Add user to docker group
+  become: true
+  ansible.builtin.user:
+    name: "{{ docker_user }}"
+    groups: "{{ docker_group_name }}"
+    append: true
+  when: docker_add_user_to_group | bool
+
+- name: Enable and start Docker service
+  become: true
+  ansible.builtin.systemd_service:
+    name: "{{ docker_service_name }}"
+    enabled: "{{ docker_enable_service | bool }}"
+    state: "{{ 'started' if docker_start_service | bool else 'stopped' }}"
+
+- name: Show Docker group session hint
+  ansible.builtin.debug:
+    msg: "Log out and log back in for docker group permissions to apply to {{ docker_user }}."
+  when: docker_add_user_to_group | bool

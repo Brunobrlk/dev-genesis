@@ -1,64 +1,15 @@
 ---
-- name: Assert Docker role supports this system
+- name: Assert Docker role supports Linux
   ansible.builtin.assert:
     that:
       - ansible_system == "Linux"
-      - ansible_distribution == docker_supported_distribution
-    fail_msg: >-
-      The Docker role currently supports Fedora only.
-      Add distro-specific task files later for Debian/Ubuntu/Mint/Arch.
+      - target_distro is defined
+      - target_distro is string
+      - target_distro | length > 0
+    fail_msg: "The Docker role requires Linux and a valid target_distro."
 
-- name: Remove conflicting Docker packages
-  become: true
-  ansible.builtin.package:
-    name: "{{ docker_conflicting_packages }}"
-    state: absent
-  when: docker_remove_conflicting_packages | bool
+- name: Install Docker for target distro
+  ansible.builtin.include_tasks: "{{ target_distro }}.yml"
 
-- name: Install DNF plugin dependency
-  become: true
-  ansible.builtin.package:
-    name: dnf-plugins-core
-    state: present
-
-- name: Add Docker Fedora repository
-  become: true
-  ansible.builtin.get_url:
-    url: "{{ docker_repo_url }}"
-    dest: "{{ docker_repo_dest }}"
-    owner: root
-    group: root
-    mode: "0644"
-
-- name: Install Docker Engine packages
-  become: true
-  ansible.builtin.dnf:
-    name: "{{ docker_packages }}"
-    state: present
-    update_cache: true
-
-- name: Ensure docker group exists
-  become: true
-  ansible.builtin.group:
-    name: "{{ docker_group_name }}"
-    state: present
-
-- name: Add user to docker group
-  become: true
-  ansible.builtin.user:
-    name: "{{ docker_user }}"
-    groups: "{{ docker_group_name }}"
-    append: true
-  when: docker_add_user_to_group | bool
-
-- name: Enable and start Docker service
-  become: true
-  ansible.builtin.systemd_service:
-    name: "{{ docker_service_name }}"
-    enabled: "{{ docker_enable_service | bool }}"
-    state: "{{ 'started' if docker_start_service | bool else 'stopped' }}"
-
-- name: Show Docker group session hint
-  ansible.builtin.debug:
-    msg: "Log out and log back in for docker group permissions to apply to {{ docker_user }}."
-  when: docker_add_user_to_group | bool
+- name: Apply Docker post-install configuration
+  ansible.builtin.import_tasks: post_install.yml
