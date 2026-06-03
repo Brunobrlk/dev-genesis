@@ -1,0 +1,6 @@
+---
+- name: Remove {{ software_label }} with package manager
+  ansible.builtin.package:
+    name: "{{ software_item.package | default(software_item.packages) }}"
+    state: absent
+  become: true
