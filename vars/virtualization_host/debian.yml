@@ -1,0 +1,27 @@
+---
+virtualization_host_packages:
+  - qemu-system-x86
+  - qemu-utils
+  - libvirt-daemon-system
+  - libvirt-clients
+  - virtinst
+  - virt-manager
+  - virt-viewer
+  - ovmf
+  - swtpm
+  - libguestfs-tools
+  - libosinfo-bin
+  - osinfo-db
+  - tuned
+  - acl
+
+virtualization_host_services:
+  - libvirtd.service
+
+virtualization_host_groups:
+  - libvirt
+  - kvm
+
+virtualization_host_virtio_win_repo_url: ""
+virtualization_host_virtio_win_repo_dest: ""
+virtualization_host_virtio_win_package: ""

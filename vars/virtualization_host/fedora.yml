@@ -1,0 +1,31 @@
+---
+virtualization_host_packages:
+  - qemu-kvm
+  - libvirt
+  - libvirt-daemon-driver-qemu
+  - libvirt-daemon-config-network
+  - virt-install
+  - virt-manager
+  - virt-viewer
+  - edk2-ovmf
+  - swtpm
+  - qemu-img
+  - guestfs-tools
+  - libosinfo
+  - tuned
+  - acl
+  - grubby
+
+virtualization_host_services:
+  - virtqemud.socket
+  - virtnetworkd.socket
+  - virtstoraged.socket
+  - virtlogd.socket
+  - virtsecretd.socket
+
+virtualization_host_groups:
+  - libvirt
+
+virtualization_host_virtio_win_repo_url: "https://fedorapeople.org/groups/virt/virtio-win/virtio-win.repo"
+virtualization_host_virtio_win_repo_dest: "/etc/yum.repos.d/virtio-win.repo"
+virtualization_host_virtio_win_package: "virtio-win"

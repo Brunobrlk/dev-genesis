@@ -36,8 +36,11 @@
     - role: android_dev
       tags: [ workstation, android_dev ]
 
-    - role: tmux
-      tags: [ workstation, tmux ]
-
     - role: docker
       tags: [ workstation, docker ]
+
+    - role: virtualization_host
+      tags: [ workstation, virtualization_host ]
+
+    - role: tmux
+      tags: [ workstation, tmux ]

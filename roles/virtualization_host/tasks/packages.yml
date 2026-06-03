@@ -1,0 +1,6 @@
+---
+- name: Install virtualization host packages
+  become: true
+  ansible.builtin.package:
+    name: "{{ virtualization_host_packages }}"
+    state: present

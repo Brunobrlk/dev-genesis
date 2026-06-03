@@ -1,0 +1,11 @@
+---
+- name: Add user to virtualization groups
+  become: true
+  ansible.builtin.user:
+    name: "{{ virtualization_host_user }}"
+    groups: "{{ virtualization_host_groups }}"
+    append: true
+
+- name: Show group membership notice
+  ansible.builtin.debug:
+    msg: "Logout/login is required before new virtualization group membership is available in existing sessions."

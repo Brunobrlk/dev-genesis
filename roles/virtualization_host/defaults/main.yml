@@ -1,0 +1,11 @@
+---
+virtualization_host_user: "{{ ansible_user_id }}"
+
+virtualization_host_images_dir: "/var/lib/libvirt/images"
+
+virtualization_host_tuned_profile: "virtual-host"
+
+# Disabled by default because it changes boot arguments.
+# Enable only when intentionally configuring IOMMU/passthrough-style host setup.
+virtualization_host_iommu_enabled: false
+virtualization_host_iommu_extra_args: "iommu=pt"

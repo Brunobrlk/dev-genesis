@@ -1,0 +1,64 @@
+---
+- name: Validate virtualization host
+  ansible.builtin.import_role:
+    name: checkhost
+    tasks_from: virtualization_host
+
+- name: Load virtualization host vars
+  ansible.builtin.include_vars:
+    file: "{{ playbook_dir }}/../vars/virtualization_host/{{ target_distro }}.yml"
+
+- name: Validate hardware virtualization support
+  ansible.builtin.import_tasks: hardware.yml
+  tags:
+    - virtualization_host
+    - virtualization_host_hardware
+
+- name: Install virtualization host packages
+  ansible.builtin.import_tasks: packages.yml
+  tags:
+    - virtualization_host
+    - virtualization_host_packages
+
+- name: Install Windows VirtIO support
+  ansible.builtin.import_tasks: virtio_win.yml
+  tags:
+    - virtualization_host
+    - virtualization_host_virtio_win
+
+- name: Enable libvirt services
+  ansible.builtin.import_tasks: services.yml
+  tags:
+    - virtualization_host
+    - virtualization_host_services
+
+- name: Configure virtualization user permissions
+  ansible.builtin.import_tasks: permissions.yml
+  tags:
+    - virtualization_host
+    - virtualization_host_permissions
+
+- name: Configure libvirt images ACLs
+  ansible.builtin.import_tasks: images_acl.yml
+  tags:
+    - virtualization_host
+    - virtualization_host_acl
+
+- name: Apply virtualization host performance profile
+  ansible.builtin.import_tasks: tuned.yml
+  tags:
+    - virtualization_host
+    - virtualization_host_tuned
+
+- name: Configure IOMMU boot arguments
+  ansible.builtin.include_tasks: "iommu/{{ target_distro }}.yml"
+  when: virtualization_host_iommu_enabled | bool
+  tags:
+    - virtualization_host
+    - virtualization_host_iommu
+
+- name: Validate libvirt/QEMU host setup
+  ansible.builtin.import_tasks: validation.yml
+  tags:
+    - virtualization_host
+    - virtualization_host_validation

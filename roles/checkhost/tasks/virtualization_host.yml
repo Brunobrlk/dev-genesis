@@ -1,0 +1,12 @@
+---
+- name: Validate virtualization host target
+  ansible.builtin.assert:
+    that:
+      - machine_profile is defined
+      - machine_profile == 'workstation'
+      - target_distro is defined
+      - target_distro in ['fedora', 'debian']
+      - ansible_system | default('Linux') == 'Linux'
+    fail_msg: >-
+      Refusing to setup virtualization host.
+      This role is only supported for Linux workstation targets using fedora or debian target_distro.

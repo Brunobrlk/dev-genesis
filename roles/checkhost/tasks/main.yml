@@ -3,8 +3,14 @@
   ansible.builtin.assert:
     that:
       - checkhost_target is defined
-      - checkhost_target in ['workstation', 'dotfiles', 'backup', 'restore', 'nvidia', 'vms', 'vm_guest']
-    fail_msg: "checkhost_target must be one of: workstation, dotfiles, backup, restore, nvidia, vms, vm_guest."
+      - checkhost_target in ['workstation', 'dotfiles', 'backup', 'restore', 'nvidia', 'vms', 'vm_guest', 'virtualization_host']
+    fail_msg: "checkhost_target must be one of: workstation, dotfiles, backup, restore, nvidia, vms, vm_guest, virtualization_host."
 
 - name: Run target-specific host checks
   ansible.builtin.include_tasks: "{{ checkhost_target }}.yml"
+
+- name: Update package cache
+  ansible.builtin.import_tasks: package_cache.yml
+  tags:
+    - checkhost
+    - package_cache

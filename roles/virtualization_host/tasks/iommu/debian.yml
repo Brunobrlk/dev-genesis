@@ -1,0 +1,47 @@
+---
+- name: Resolve Debian IOMMU kernel arguments
+  ansible.builtin.set_fact:
+    virtualization_host_iommu_vendor_arg: >-
+      {{
+        'intel_iommu=on'
+        if 'vmx' in (ansible_facts.processor_flags | default([]))
+        else 'amd_iommu=on'
+      }}
+
+- name: Build Debian IOMMU kernel argument string
+  ansible.builtin.set_fact:
+    virtualization_host_iommu_args: "{{ virtualization_host_iommu_vendor_arg }} {{ virtualization_host_iommu_extra_args }}"
+
+- name: Read Debian GRUB kernel arguments
+  become: true
+  ansible.builtin.command:
+    argv:
+      - grep
+      - "^GRUB_CMDLINE_LINUX="
+      - /etc/default/grub
+  register: virtualization_host_debian_grub_cmdline
+  changed_when: false
+  failed_when: false
+
+- name: Configure Debian IOMMU kernel arguments
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX="(.*)"$'
+    line: 'GRUB_CMDLINE_LINUX="\1 {{ virtualization_host_iommu_args }}"'
+    backrefs: true
+  when: virtualization_host_iommu_vendor_arg not in virtualization_host_debian_grub_cmdline.stdout
+  register: virtualization_host_debian_iommu_update
+
+- name: Update Debian GRUB configuration
+  become: true
+  ansible.builtin.command:
+    argv:
+      - update-grub
+  when: virtualization_host_debian_iommu_update is changed
+  changed_when: true
+
+- name: Show Debian IOMMU reboot notice
+  ansible.builtin.debug:
+    msg: "Reboot is required for IOMMU kernel arguments to take effect."
+  when: virtualization_host_debian_iommu_update is changed

@@ -1,0 +1,27 @@
+---
+- name: Ensure libvirt images directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ virtualization_host_images_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Allow user access to existing libvirt images
+  become: true
+  ansible.posix.acl:
+    path: "{{ virtualization_host_images_dir }}"
+    entity: "{{ virtualization_host_user }}"
+    etype: user
+    permissions: rwX
+    recursive: true
+    state: present
+
+- name: Allow user access to new libvirt images
+  become: true
+  ansible.posix.acl:
+    path: "{{ virtualization_host_images_dir }}"
+    entity: "{{ virtualization_host_user }}"
+    etype: user
+    permissions: rwx
+    default: true
+    state: present

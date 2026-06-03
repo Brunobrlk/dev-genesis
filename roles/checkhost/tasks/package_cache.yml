@@ -1,0 +1,9 @@
+---
+- name: Update Debian package cache
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  when:
+    - target_distro is defined
+    - target_distro == 'debian'

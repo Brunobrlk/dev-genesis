@@ -1,0 +1,22 @@
+---
+- name: Validate QEMU virtualization host setup
+  become: true
+  ansible.builtin.command:
+    argv:
+      - virt-host-validate
+      - qemu
+  register: virtualization_host_validation
+  changed_when: false
+  failed_when: false
+
+- name: Show virtualization host validation output
+  ansible.builtin.debug:
+    var: virtualization_host_validation.stdout_lines
+
+- name: Fail when virtualization host validation has hard failures
+  ansible.builtin.assert:
+    that:
+      - virtualization_host_validation.stdout is not search('FAIL')
+    fail_msg: >-
+      virt-host-validate reported hard failures.
+      Review the validation output above before creating VMs.

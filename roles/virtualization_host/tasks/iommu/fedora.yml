@@ -1,0 +1,38 @@
+---
+- name: Resolve Fedora IOMMU kernel arguments
+  ansible.builtin.set_fact:
+    virtualization_host_iommu_vendor_arg: >-
+      {{
+        'intel_iommu=on'
+        if 'vmx' in (ansible_facts.processor_flags | default([]))
+        else 'amd_iommu=on'
+      }}
+
+- name: Build Fedora IOMMU kernel argument string
+  ansible.builtin.set_fact:
+    virtualization_host_iommu_args: "{{ virtualization_host_iommu_vendor_arg }} {{ virtualization_host_iommu_extra_args }}"
+
+- name: Read Fedora kernel arguments
+  become: true
+  ansible.builtin.command:
+    argv:
+      - grubby
+      - "--info=DEFAULT"
+  register: virtualization_host_fedora_grubby_info
+  changed_when: false
+
+- name: Configure Fedora IOMMU kernel arguments
+  become: true
+  ansible.builtin.command:
+    argv:
+      - grubby
+      - "--update-kernel=ALL"
+      - "--args={{ virtualization_host_iommu_args }}"
+  when: virtualization_host_iommu_vendor_arg not in virtualization_host_fedora_grubby_info.stdout
+  changed_when: true
+  register: virtualization_host_fedora_iommu_update
+
+- name: Show Fedora IOMMU reboot notice
+  ansible.builtin.debug:
+    msg: "Reboot is required for IOMMU kernel arguments to take effect."
+  when: virtualization_host_fedora_iommu_update is changed

@@ -1,0 +1,17 @@
+---
+- name: Install Windows VirtIO repository
+  become: true
+  ansible.builtin.get_url:
+    url: "{{ virtualization_host_virtio_win_repo_url }}"
+    dest: "{{ virtualization_host_virtio_win_repo_dest }}"
+    mode: "0644"
+  when:
+    - virtualization_host_virtio_win_repo_url | length > 0
+    - virtualization_host_virtio_win_repo_dest | length > 0
+
+- name: Install Windows VirtIO package
+  become: true
+  ansible.builtin.package:
+    name: "{{ virtualization_host_virtio_win_package }}"
+    state: present
+  when: virtualization_host_virtio_win_package | length > 0
