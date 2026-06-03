@@ -10,7 +10,7 @@
 
 - name: Install Android development dependencies
   ansible.builtin.import_tasks: dependencies.yml
-  tags:
+  tags: 
     - android_dev
     - android_dev_dependencies
 
@@ -20,26 +20,29 @@
     - android_dev
     - android_dev_cmdline_tools
 
-- name: Accept Android SDK licenses
-  ansible.builtin.import_tasks: licenses.yml
-  tags:
-    - android_dev
-    - android_dev_licenses
+- name: Setup Android SDK and AVDs
+  environment: "{{ android_environment }}"
+  block:
+  - name: Accept Android SDK licenses
+    ansible.builtin.import_tasks: licenses.yml
+    tags:
+      - android_dev
+      - android_licenses
 
-- name: Install Android SDK components
-  ansible.builtin.import_tasks: sdk_components.yml
-  tags:
-    - android_dev
-    - android_dev_sdk
+  - name: Install Android SDK components
+    ansible.builtin.import_tasks: sdk_components.yml
+    tags:
+      - android_dev
+      - android_sdk
 
-- name: Create Android virtual devices
-  ansible.builtin.import_tasks: avd.yml
-  tags:
-    - android_dev
-    - android_dev_avd
+  - name: Create Android virtual devices
+    ansible.builtin.import_tasks: avd.yml
+    tags:
+      - android_dev
+      - android_avd
 
 - name: Setup Android Studio versions
   ansible.builtin.import_tasks: android_studio.yml
   tags:
     - android_dev
-    - android_dev_studio
+    - android_studio

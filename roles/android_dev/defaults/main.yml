@@ -2,6 +2,10 @@
 android_sdk_root: "{{ ansible_env.HOME }}/opt/android-sdk"
 android_home: "{{ android_sdk_root }}"
 android_avd_home: "{{ ansible_env.HOME }}/.config/android/avd"
+android_environment:
+  ANDROID_HOME: "{{ android_home }}"
+  ANDROID_SDK_ROOT: "{{ android_sdk_root }}"
+  ANDROID_AVD_HOME: "{{ android_avd_home }}"
 
 android_cmdline_tools_dir: "{{ android_sdk_root }}/cmdline-tools/latest"
 android_sdkmanager_path: "{{ android_cmdline_tools_dir }}/bin/sdkmanager"

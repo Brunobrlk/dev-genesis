@@ -5,10 +5,6 @@
       - "{{ android_sdkmanager_path }}"
       - "--sdk_root={{ android_sdk_root }}"
       - "--list_installed"
-  environment:
-    ANDROID_HOME: "{{ android_home }}"
-    ANDROID_SDK_ROOT: "{{ android_sdk_root }}"
-    ANDROID_AVD_HOME: "{{ android_avd_home }}"
   register: android_sdk_installed_list
   changed_when: false
 
@@ -27,10 +23,6 @@
       - "{{ android_sdkmanager_path }}"
       - "--sdk_root={{ android_sdk_root }}"
       - "{{ item }}"
-  environment:
-    ANDROID_HOME: "{{ android_home }}"
-    ANDROID_SDK_ROOT: "{{ android_sdk_root }}"
-    ANDROID_AVD_HOME: "{{ android_avd_home }}"
   loop: "{{ android_sdk_packages }}"
   loop_control:
     label: "{{ item }}"

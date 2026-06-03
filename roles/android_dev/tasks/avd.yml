@@ -11,10 +11,6 @@
       - "{{ android_sdkmanager_path }}"
       - "--sdk_root={{ android_sdk_root }}"
       - "--list_installed"
-  environment:
-    ANDROID_HOME: "{{ android_home }}"
-    ANDROID_SDK_ROOT: "{{ android_sdk_root }}"
-    ANDROID_AVD_HOME: "{{ android_avd_home }}"
   register: android_avd_sdk_installed_list
   changed_when: false
 
@@ -33,10 +29,6 @@
       - "{{ android_sdkmanager_path }}"
       - "--sdk_root={{ android_sdk_root }}"
       - "{{ item }}"
-  environment:
-    ANDROID_HOME: "{{ android_home }}"
-    ANDROID_SDK_ROOT: "{{ android_sdk_root }}"
-    ANDROID_AVD_HOME: "{{ android_avd_home }}"
   loop: "{{ android_avd_system_images }}"
   loop_control:
     label: "{{ item }}"
@@ -49,10 +41,6 @@
       - "{{ android_avdmanager_path }}"
       - list
       - avd
-  environment:
-    ANDROID_HOME: "{{ android_home }}"
-    ANDROID_SDK_ROOT: "{{ android_sdk_root }}"
-    ANDROID_AVD_HOME: "{{ android_avd_home }}"
   register: android_existing_avds
   changed_when: false
 
@@ -66,10 +54,6 @@
       -k {{ item | quote }}
   args:
     executable: /bin/bash
-  environment:
-    ANDROID_HOME: "{{ android_home }}"
-    ANDROID_SDK_ROOT: "{{ android_sdk_root }}"
-    ANDROID_AVD_HOME: "{{ android_avd_home }}"
   loop: "{{ android_avd_system_images }}"
   loop_control:
     label: "{{ android_avd_name }}"
