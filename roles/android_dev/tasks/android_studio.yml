@@ -1,0 +1,80 @@
+---
+- name: Validate Android Studio archive source var
+  ansible.builtin.assert:
+    that:
+      - android_studio_archive_source_dir is defined
+      - android_studio_archive_source_dir | length > 0
+    fail_msg: "android_studio_archive_source_dir is required. Restore Android Studio archives first."
+
+- name: Check Android Studio archive source directory
+  ansible.builtin.stat:
+    path: "{{ android_studio_archive_source_dir }}"
+  register: android_studio_archive_source_stat
+
+- name: Validate Android Studio archive source directory
+  ansible.builtin.assert:
+    that:
+      - android_studio_archive_source_stat.stat.exists
+      - android_studio_archive_source_stat.stat.isdir
+    fail_msg: >-
+      Android Studio archive source directory does not exist:
+      {{ android_studio_archive_source_dir }}
+      Restore it before running android_dev.
+
+- name: Find Android Studio archives
+  ansible.builtin.find:
+    paths: "{{ android_studio_archive_source_dir }}"
+    patterns: "android-studio-*.tar.gz"
+    file_type: file
+    recurse: false
+  register: android_studio_archives
+
+- name: Validate Android Studio archives were found
+  ansible.builtin.assert:
+    that:
+      - android_studio_archives.files | length > 0
+    fail_msg: >-
+      No Android Studio archives found in {{ android_studio_archive_source_dir }}.
+      Expected files matching android-studio-*.tar.gz.
+
+- name: Create Android Studio install root
+  ansible.builtin.file:
+    path: "{{ android_studio_install_root }}"
+    state: directory
+    mode: "0755"
+
+- name: Create desktop entries directory
+  ansible.builtin.file:
+    path: "{{ android_desktop_entries_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Create Android Studio version directories
+  ansible.builtin.file:
+    path: "{{ android_studio_install_dir }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ android_studio_archives.files }}"
+  loop_control:
+    label: "{{ android_studio_base }}"
+  vars:
+    android_studio_base: "{{ item.path | basename | regex_replace('\\.tar\\.gz$', '') }}"
+    android_studio_install_dir: "{{ android_studio_install_root }}/{{ android_studio_base }}"
+
+- name: Extract Android Studio archives
+  ansible.builtin.unarchive:
+    src: "{{ item.path }}"
+    dest: "{{ android_studio_install_dir }}"
+    remote_src: true
+    extra_opts:
+      - --strip-components=1
+    creates: "{{ android_studio_install_dir }}/bin/studio.sh"
+  loop: "{{ android_studio_archives.files }}"
+  loop_control:
+    label: "{{ android_studio_base }}"
+  vars:
+    android_studio_base: "{{ item.path | basename | regex_replace('\\.tar\\.gz$', '') }}"
+    android_studio_install_dir: "{{ android_studio_install_root }}/{{ android_studio_base }}"
+
+- name: Create Android Studio desktop entries
+  ansible.builtin.import_tasks: desktop_entry.yml

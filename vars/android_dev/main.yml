@@ -1,0 +1,29 @@
+---
+android_cmdline_tools_url: "https://dl.google.com/android/repository/commandlinetools-linux-14742923_latest.zip"
+
+android_studio_archive_source_dir: "{{ ansible_env.HOME }}/Downloads/AndroidStudioVersions"
+
+android_sdk_packages:
+  - "platform-tools"
+  - "emulator"
+  - "platforms;android-36"
+  - "build-tools;36.0.0"
+  - "sources;android-36"
+
+android_avd_system_images:
+  - "system-images;android-36;default;x86_64"
+  - "system-images;android-36;google_apis;x86_64"
+  - "system-images;android-36;google_apis_ps16k;x86_64"
+  - "system-images;android-36;google_apis_playstore;x86_64"
+  - "system-images;android-35;google_apis;x86_64"
+  - "system-images;android-34;google_apis;x86_64"
+  - "system-images;android-33;google_apis;x86_64"
+  - "system-images;android-32;google_apis;x86_64"
+  - "system-images;android-31;google_apis;x86_64"
+  - "system-images;android-30;google_apis;x86_64"
+  - "system-images;android-29;google_apis;x86_64"
+  - "system-images;android-28;google_apis;x86_64"
+  - "system-images;android-27;google_apis;x86_64"
+  - "system-images;android-26;google_apis;x86_64"
+  - "system-images;android-25;google_apis;x86_64"
+  - "system-images;android-24;google_apis;x86_64"

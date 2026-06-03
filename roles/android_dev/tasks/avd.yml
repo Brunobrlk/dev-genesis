@@ -1,0 +1,87 @@
+---
+- name: Create Android AVD directory
+  ansible.builtin.file:
+    path: "{{ android_avd_home }}"
+    state: directory
+    mode: "0755"
+
+- name: Read installed Android SDK packages before AVD setup
+  ansible.builtin.command:
+    argv:
+      - "{{ android_sdkmanager_path }}"
+      - "--sdk_root={{ android_sdk_root }}"
+      - "--list_installed"
+  environment:
+    ANDROID_HOME: "{{ android_home }}"
+    ANDROID_SDK_ROOT: "{{ android_sdk_root }}"
+    ANDROID_AVD_HOME: "{{ android_avd_home }}"
+  register: android_avd_sdk_installed_list
+  changed_when: false
+
+- name: Parse installed Android SDK packages before AVD setup
+  ansible.builtin.set_fact:
+    android_avd_sdk_installed_packages: >-
+      {{
+        android_avd_sdk_installed_list.stdout_lines
+        | map('regex_replace', '^\\s*([^\\s]+).*$', '\\1')
+        | list
+      }}
+
+- name: Install Android AVD system images
+  ansible.builtin.command:
+    argv:
+      - "{{ android_sdkmanager_path }}"
+      - "--sdk_root={{ android_sdk_root }}"
+      - "{{ item }}"
+  environment:
+    ANDROID_HOME: "{{ android_home }}"
+    ANDROID_SDK_ROOT: "{{ android_sdk_root }}"
+    ANDROID_AVD_HOME: "{{ android_avd_home }}"
+  loop: "{{ android_avd_system_images }}"
+  loop_control:
+    label: "{{ item }}"
+  when: item not in android_avd_sdk_installed_packages
+  changed_when: true
+
+- name: Read existing Android virtual devices
+  ansible.builtin.command:
+    argv:
+      - "{{ android_avdmanager_path }}"
+      - list
+      - avd
+  environment:
+    ANDROID_HOME: "{{ android_home }}"
+    ANDROID_SDK_ROOT: "{{ android_sdk_root }}"
+    ANDROID_AVD_HOME: "{{ android_avd_home }}"
+  register: android_existing_avds
+  changed_when: false
+
+- name: Create Android virtual devices
+  ansible.builtin.shell: |
+    set -euo pipefail
+
+    printf 'no\n' | {{ android_avdmanager_path | quote }} create avd \
+      -f \
+      -n {{ android_avd_name | quote }} \
+      -k {{ item | quote }}
+  args:
+    executable: /bin/bash
+  environment:
+    ANDROID_HOME: "{{ android_home }}"
+    ANDROID_SDK_ROOT: "{{ android_sdk_root }}"
+    ANDROID_AVD_HOME: "{{ android_avd_home }}"
+  loop: "{{ android_avd_system_images }}"
+  loop_control:
+    label: "{{ android_avd_name }}"
+  vars:
+    android_avd_name: >-
+      {{
+        'api'
+        ~ (
+          item
+          | regex_replace('^system-images;android-', '')
+          | replace(';', '-')
+        )
+      }}
+  when: "('Name: ' ~ android_avd_name) not in android_existing_avds.stdout"
+  changed_when: true

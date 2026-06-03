@@ -1,0 +1,45 @@
+---
+- name: Validate Android development host
+  ansible.builtin.import_role:
+    name: checkhost
+    tasks_from: android_dev
+
+- name: Load Android development vars
+  ansible.builtin.include_vars:
+    file: "{{ playbook_dir }}/../vars/android_dev/main.yml"
+
+- name: Install Android development dependencies
+  ansible.builtin.import_tasks: dependencies.yml
+  tags:
+    - android_dev
+    - android_dev_dependencies
+
+- name: Install Android command-line tools
+  ansible.builtin.import_tasks: cmdline_tools.yml
+  tags:
+    - android_dev
+    - android_dev_cmdline_tools
+
+- name: Accept Android SDK licenses
+  ansible.builtin.import_tasks: licenses.yml
+  tags:
+    - android_dev
+    - android_dev_licenses
+
+- name: Install Android SDK components
+  ansible.builtin.import_tasks: sdk_components.yml
+  tags:
+    - android_dev
+    - android_dev_sdk
+
+- name: Create Android virtual devices
+  ansible.builtin.import_tasks: avd.yml
+  tags:
+    - android_dev
+    - android_dev_avd
+
+- name: Setup Android Studio versions
+  ansible.builtin.import_tasks: android_studio.yml
+  tags:
+    - android_dev
+    - android_dev_studio

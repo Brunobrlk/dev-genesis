@@ -1,0 +1,22 @@
+---
+- name: Find installed Android Studio versions
+  ansible.builtin.find:
+    paths: "{{ android_studio_install_root }}"
+    patterns: "android-studio-*"
+    file_type: directory
+    recurse: false
+  register: android_studio_installed_versions
+
+- name: Create Android Studio desktop entries
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../templates/desktop_entries/android-studio.desktop.j2"
+    dest: "{{ android_desktop_entries_dir }}/{{ android_studio_base }}.desktop"
+    mode: "0755"
+  loop: "{{ android_studio_installed_versions.files }}"
+  loop_control:
+    label: "{{ android_studio_base }}"
+  vars:
+    android_studio_base: "{{ item.path | basename }}"
+    android_studio_install_dir: "{{ item.path }}"
+    android_studio_codename: "{{ android_studio_base | regex_replace('^android-studio-', '') }}"
+    android_studio_display_name: "{{ android_studio_codename | replace('-', ' ') | title }}"

@@ -1,4 +1,0 @@
----
-- name: Apply system optimizations
-  ansible.builtin.import_role:
-    name: optimize

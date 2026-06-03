@@ -1,0 +1,38 @@
+---
+- name: Read installed Android SDK packages
+  ansible.builtin.command:
+    argv:
+      - "{{ android_sdkmanager_path }}"
+      - "--sdk_root={{ android_sdk_root }}"
+      - "--list_installed"
+  environment:
+    ANDROID_HOME: "{{ android_home }}"
+    ANDROID_SDK_ROOT: "{{ android_sdk_root }}"
+    ANDROID_AVD_HOME: "{{ android_avd_home }}"
+  register: android_sdk_installed_list
+  changed_when: false
+
+- name: Parse installed Android SDK package names
+  ansible.builtin.set_fact:
+    android_sdk_installed_packages: >-
+      {{
+        android_sdk_installed_list.stdout_lines
+        | map('regex_replace', '^\\s*([^\\s]+).*$', '\\1')
+        | list
+      }}
+
+- name: Install Android SDK packages
+  ansible.builtin.command:
+    argv:
+      - "{{ android_sdkmanager_path }}"
+      - "--sdk_root={{ android_sdk_root }}"
+      - "{{ item }}"
+  environment:
+    ANDROID_HOME: "{{ android_home }}"
+    ANDROID_SDK_ROOT: "{{ android_sdk_root }}"
+    ANDROID_AVD_HOME: "{{ android_avd_home }}"
+  loop: "{{ android_sdk_packages }}"
+  loop_control:
+    label: "{{ item }}"
+  when: item not in android_sdk_installed_packages
+  changed_when: true

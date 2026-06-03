@@ -1,4 +1,0 @@
----
-- name: Setup display-server-specific behavior
-  ansible.builtin.import_role:
-    name: display

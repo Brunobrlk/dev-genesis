@@ -1,0 +1,6 @@
+---
+- name: Install Android development dependency packages
+  become: true
+  ansible.builtin.package:
+    name: "{{ android_dev_dependency_packages }}"
+    state: present

@@ -1,0 +1,48 @@
+---
+- name: Check Android command-line tools installation
+  ansible.builtin.stat:
+    path: "{{ android_sdkmanager_path }}"
+  register: android_sdkmanager_stat
+
+- name: Install Android command-line tools
+  when: not android_sdkmanager_stat.stat.exists
+  block:
+    - name: Create temporary Android command-line tools directory
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: android-cmdline-tools
+      register: android_cmdline_tools_tmp
+
+    - name: Download Android command-line tools
+      ansible.builtin.get_url:
+        url: "{{ android_cmdline_tools_url }}"
+        dest: "{{ android_cmdline_tools_tmp.path }}/{{ android_cmdline_tools_zip_name }}"
+        mode: "0644"
+
+    - name: Extract Android command-line tools
+      ansible.builtin.unarchive:
+        src: "{{ android_cmdline_tools_tmp.path }}/{{ android_cmdline_tools_zip_name }}"
+        dest: "{{ android_cmdline_tools_tmp.path }}"
+        remote_src: true
+
+    - name: Create Android command-line tools destination
+      ansible.builtin.file:
+        path: "{{ android_cmdline_tools_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Copy Android command-line tools into latest directory
+      ansible.builtin.command:
+        argv:
+          - rsync
+          - -a
+          - "{{ android_cmdline_tools_tmp.path }}/cmdline-tools/"
+          - "{{ android_cmdline_tools_dir }}/"
+      changed_when: true
+
+  always:
+    - name: Remove temporary Android command-line tools directory
+      ansible.builtin.file:
+        path: "{{ android_cmdline_tools_tmp.path | default('') }}"
+        state: absent
+      when: android_cmdline_tools_tmp is defined
