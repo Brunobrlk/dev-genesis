@@ -1,7 +1,11 @@
 ---
 - name: Setup virtual machines on host
-  hosts: vm_hosts
+  hosts: workstation
+  connection: local
   gather_facts: true
+
+  vars_files:
+    - ../vars/vms/main.yml
 
   pre_tasks:
     - name: Validate VM host target
@@ -17,8 +21,7 @@
     - role: virtualization_host
       tags:
         - virtualization_host
-        - vms
 
-    - role: vms
+    - role: vms_restore
       tags:
-        - vms
+        - vms_restore

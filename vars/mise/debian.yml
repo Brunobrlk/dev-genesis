@@ -8,9 +8,10 @@ mise_install:
 
   - name: mise-apt-repository
     method: debian/apt_repository
-    key_url: https://mise.jdx.dev/gpg-key.pub
-    keyring: /etc/apt/keyrings/mise-archive-keyring.gpg
-    repository: "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg] https://mise.jdx.dev/deb stable main"
+    repo:
+      key_url: https://mise.jdx.dev/gpg-key.pub
+      keyring: /etc/apt/keyrings/mise-archive-keyring.gpg
+      line: "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg] https://mise.jdx.dev/deb stable main"
 
   - name: mise
     method: debian/apt

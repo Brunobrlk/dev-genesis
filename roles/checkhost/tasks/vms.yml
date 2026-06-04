@@ -3,7 +3,7 @@
   ansible.builtin.assert:
     that:
       - machine_profile is defined
-      - machine_profile == 'vm_host'
+      - machine_profile == 'workstation'
       - confirm_vm_setup is defined
       - confirm_vm_setup | bool
       - vms_libvirt_uri is defined
@@ -15,6 +15,6 @@
       - vms_names is defined
       - vms_names | length > 0
     fail_msg: >-
-      Refusing to manage VMs. Set machine_profile=vm_host,
+      Refusing to manage VMs. Set machine_profile=workstation,
       confirm_vm_setup=true, and configure vms_libvirt_uri,
       vms_backup_root, vms_disk_dir, and vms_names.

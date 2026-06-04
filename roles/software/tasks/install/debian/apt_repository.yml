@@ -1,10 +1,44 @@
 ---
+- name: Validate apt repository item for {{ software_label }}
+  ansible.builtin.assert:
+    that:
+      - software_item.repo is defined
+      - software_item.repo is mapping
+      - software_item.repo.line is defined
+      - software_item.repo.line | length > 0
+    fail_msg: >-
+      Invalid apt_repository item for {{ software_label }}.
+      Define software_item.repo.line and optionally repo.key_url, repo.keyring,
+      repo.filename, package, or packages.
+
+- name: Ensure apt keyring directory exists for {{ software_label }}
+  ansible.builtin.file:
+    path: "{{ software_item.repo.keyring | dirname }}"
+    state: directory
+    mode: "0755"
+  become: true
+  when:
+    - software_item.repo.key_url is defined
+    - software_item.repo.keyring is defined
+
+- name: Download apt repository keyring for {{ software_label }}
+  ansible.builtin.get_url:
+    url: "{{ software_item.repo.key_url }}"
+    dest: "{{ software_item.repo.keyring }}"
+    mode: "0644"
+  become: true
+  when:
+    - software_item.repo.key_url is defined
+    - software_item.repo.keyring is defined
+
 - name: Add apt repository key for {{ software_label }}
   ansible.builtin.apt_key:
     url: "{{ software_item.repo.key_url }}"
     state: present
   become: true
-  when: software_item.repo.key_url is defined
+  when:
+    - software_item.repo.key_url is defined
+    - software_item.repo.keyring is not defined
 
 - name: Add apt repository for {{ software_label }}
   ansible.builtin.apt_repository:
@@ -20,3 +54,5 @@
     state: present
     update_cache: true
   become: true
+  when:
+    - software_item.package is defined or software_item.packages is defined

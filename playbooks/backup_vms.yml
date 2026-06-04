@@ -1,6 +1,6 @@
 ---
 - name: Back up local Linux libvirt VMs
-  hosts: localhost
+  hosts: workstation
   connection: local
   gather_facts: true
 

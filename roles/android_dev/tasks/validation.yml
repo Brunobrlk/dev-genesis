@@ -1,0 +1,22 @@
+---
+- name: Validate Android Studio archive source var
+  ansible.builtin.assert:
+    that:
+      - android_studio_archive_source_dir is defined
+      - android_studio_archive_source_dir | length > 0
+    fail_msg: "android_studio_archive_source_dir is required. Restore Android Studio archives first."
+
+- name: Check Android Studio archive source directory
+  ansible.builtin.stat:
+    path: "{{ android_studio_archive_source_dir }}"
+  register: android_studio_archive_source_stat
+
+- name: Validate Android Studio archive source directory
+  ansible.builtin.assert:
+    that:
+      - android_studio_archive_source_stat.stat.exists
+      - android_studio_archive_source_stat.stat.isdir
+    fail_msg: >-
+      Android Studio archive source directory does not exist:
+      {{ android_studio_archive_source_dir }}
+      Restore it before running android_dev.
