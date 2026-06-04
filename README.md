@@ -79,8 +79,6 @@ ansible-playbook -i inventories/workstation/hosts.yml playbooks/setup_dotfiles.y
 ansible-playbook -i inventories/workstation/hosts.yml playbooks/backup_restore.yml
 ansible-playbook -i inventories/workstation/hosts.yml playbooks/setup_nvidia.yml
 
-ansible-playbook -i inventories/vms/hosts.yml playbooks/setup_vms.yml
-ansible-playbook -i inventories/vms/hosts.yml playbooks/setup_vm_guests.yml
 ```
 
 ## Rules

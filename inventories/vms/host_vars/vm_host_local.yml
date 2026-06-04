@@ -1,4 +1,0 @@
----
-machine_profile: vm_host
-confirm_vm_setup: false
-vm_host_role: local_libvirt_host

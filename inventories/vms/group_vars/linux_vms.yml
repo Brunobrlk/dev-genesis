@@ -1,5 +1,0 @@
----
-machine_profile: vm_guest
-vm_guest_family: linux
-ansible_user: bruno
-ansible_python_interpreter: /usr/bin/python3
