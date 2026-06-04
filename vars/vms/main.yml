@@ -1,0 +1,22 @@
+---
+vms_libvirt_uri: qemu:///system
+
+vms_backup_root: /run/media/brunobrlk/Backup/dev-genesis/vms
+
+vms_disk_dir: /var/lib/libvirt/images
+vms_domain_backup_dir: "{{ vms_backup_root }}/domains"
+vms_disk_backup_dir: "{{ vms_backup_root }}/disks"
+
+confirm_vm_setup: false
+confirm_vm_restore: false
+
+vms_restore_selinux_labels: true
+
+# Linux only. Windows intentionally excluded from V1.
+vms_names:
+  - fedora_desktop
+  - debian_desktop
+  - ubuntu_desktop
+  - debian_server
+  - fedora_server
+  - ubuntu_server

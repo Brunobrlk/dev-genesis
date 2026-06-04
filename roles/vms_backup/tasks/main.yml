@@ -1,0 +1,9 @@
+---
+- name: Validate VM backup
+  ansible.builtin.import_tasks: validation.yml
+
+- name: Export VM domains
+  ansible.builtin.import_tasks: export_domains.yml
+
+- name: Copy VM disks
+  ansible.builtin.import_tasks: copy_disks.yml

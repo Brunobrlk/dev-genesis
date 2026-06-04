@@ -1,0 +1,14 @@
+---
+- name: Restore local Linux libvirt VMs
+  hosts: localhost
+  connection: local
+  gather_facts: true
+
+  vars_files:
+    - ../vars/vms/main.yml
+
+  roles:
+    - role: checkhost
+      tasks_from: vms
+
+    - role: vms_restore

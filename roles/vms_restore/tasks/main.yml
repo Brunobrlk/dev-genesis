@@ -1,0 +1,12 @@
+---
+- name: Validate VM restore
+  ansible.builtin.import_tasks: validation.yml
+
+- name: Restore VM disks
+  ansible.builtin.import_tasks: copy_disks.yml
+
+- name: Restore VM SELinux labels
+  ansible.builtin.import_tasks: selinux.yml
+
+- name: Define VM domains
+  ansible.builtin.import_tasks: define_domains.yml

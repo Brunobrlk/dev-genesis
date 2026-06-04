@@ -1,0 +1,29 @@
+---
+- name: Ensure VM backup directories exist
+  become: true
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ vms_domain_backup_dir }}"
+    - "{{ vms_disk_backup_dir }}"
+
+- name: Check VM disk files exist before backup
+  become: true
+  ansible.builtin.stat:
+    path: "{{ vms_disk_dir }}/{{ item }}.qcow2"
+  register: vms_backup_disk_stats
+  loop: "{{ vms_names }}"
+  loop_control:
+    label: "{{ item }}"
+
+- name: Validate VM disk files before backup
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+      - item.stat.isreg
+    fail_msg: "Missing VM disk: {{ vms_disk_dir }}/{{ item.item }}.qcow2"
+  loop: "{{ vms_backup_disk_stats.results }}"
+  loop_control:
+    label: "{{ item.item }}"

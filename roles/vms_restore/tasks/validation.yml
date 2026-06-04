@@ -1,0 +1,50 @@
+---
+- name: Refuse VM restore without explicit confirmation
+  ansible.builtin.assert:
+    that:
+      - confirm_vm_restore is defined
+      - confirm_vm_restore | bool
+    fail_msg: "Refusing to restore VMs. Set confirm_vm_restore=true."
+
+- name: Ensure VM disk directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ vms_disk_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Check VM domain XML backups before restore
+  ansible.builtin.stat:
+    path: "{{ vms_domain_backup_dir }}/{{ item }}.xml"
+  register: vms_restore_domain_stats
+  loop: "{{ vms_names }}"
+  loop_control:
+    label: "{{ item }}"
+
+- name: Validate VM domain XML backups before restore
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+      - item.stat.isreg
+    fail_msg: "Missing VM domain XML backup: {{ vms_domain_backup_dir }}/{{ item.item }}.xml"
+  loop: "{{ vms_restore_domain_stats.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+
+- name: Check VM disk backups before restore
+  ansible.builtin.stat:
+    path: "{{ vms_disk_backup_dir }}/{{ item }}.qcow2"
+  register: vms_restore_disk_stats
+  loop: "{{ vms_names }}"
+  loop_control:
+    label: "{{ item }}"
+
+- name: Validate VM disk backups before restore
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+      - item.stat.isreg
+    fail_msg: "Missing VM disk backup: {{ vms_disk_backup_dir }}/{{ item.item }}.qcow2"
+  loop: "{{ vms_restore_disk_stats.results }}"
+  loop_control:
+    label: "{{ item.item }}"

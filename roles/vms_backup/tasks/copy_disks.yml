@@ -1,0 +1,13 @@
+---
+- name: Back up VM disks
+  become: true
+  ansible.builtin.command:
+    argv:
+      - rsync
+      - -aH
+      - --sparse
+      - "{{ vms_disk_dir }}/{{ item }}.qcow2"
+      - "{{ vms_disk_backup_dir }}/{{ item }}.qcow2"
+  loop: "{{ vms_names }}"
+  loop_control:
+    label: "{{ item }}"

@@ -6,4 +6,15 @@
       - machine_profile == 'vm_host'
       - confirm_vm_setup is defined
       - confirm_vm_setup | bool
-    fail_msg: "Refusing to setup VMs. Set machine_profile=vm_host and confirm_vm_setup=true."
+      - vms_libvirt_uri is defined
+      - vms_libvirt_uri | length > 0
+      - vms_backup_root is defined
+      - vms_backup_root is match('^/')
+      - vms_disk_dir is defined
+      - vms_disk_dir is match('^/')
+      - vms_names is defined
+      - vms_names | length > 0
+    fail_msg: >-
+      Refusing to manage VMs. Set machine_profile=vm_host,
+      confirm_vm_setup=true, and configure vms_libvirt_uri,
+      vms_backup_root, vms_disk_dir, and vms_names.

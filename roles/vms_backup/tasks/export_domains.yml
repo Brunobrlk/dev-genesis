@@ -1,0 +1,26 @@
+---
+- name: Export VM domain XML
+  become: true
+  ansible.builtin.command:
+    argv:
+      - virsh
+      - --connect
+      - "{{ vms_libvirt_uri }}"
+      - dumpxml
+      - --inactive
+      - "{{ item }}"
+  changed_when: false
+  register: vms_dumpxml_results
+  loop: "{{ vms_names }}"
+  loop_control:
+    label: "{{ item }}"
+
+- name: Save VM domain XML
+  become: true
+  ansible.builtin.copy:
+    dest: "{{ vms_domain_backup_dir }}/{{ item.item }}.xml"
+    content: "{{ item.stdout }}\n"
+    mode: "0644"
+  loop: "{{ vms_dumpxml_results.results }}"
+  loop_control:
+    label: "{{ item.item }}"

@@ -1,0 +1,11 @@
+---
+- name: Restore SELinux labels for libvirt files
+  become: true
+  ansible.builtin.command:
+    argv:
+      - restorecon
+      - -RF
+      - /var/lib/libvirt
+  changed_when: false
+  failed_when: false
+  when: vms_restore_selinux_labels | bool

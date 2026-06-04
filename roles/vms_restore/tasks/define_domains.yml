@@ -1,0 +1,13 @@
+---
+- name: Define restored VM domains
+  become: true
+  ansible.builtin.command:
+    argv:
+      - virsh
+      - --connect
+      - "{{ vms_libvirt_uri }}"
+      - define
+      - "{{ vms_domain_backup_dir }}/{{ item }}.xml"
+  loop: "{{ vms_names }}"
+  loop_control:
+    label: "{{ item }}"
