@@ -1,51 +1,142 @@
 # dev-genesis
 
-Ansible project for rebuilding and maintaining my developer environment.
+<p align="center">
+  <strong>Personal workstation automation powered by Ansible.</strong>
+</p>
 
-`dev-genesis` automates workstation setup, dotfiles integration, backup restoration, NVIDIA setup, and virtual machine orchestration. Dotfiles and standalone tools stay in separate repositories; this repo owns automation.
+<p align="center">
+  <img alt="Ansible" src="https://img.shields.io/badge/Ansible-automation-black?logo=ansible&logoColor=white">
+  <img alt="Fedora" src="https://img.shields.io/badge/Fedora-primary-51A2DA?logo=fedora&logoColor=white">
+  <img alt="Debian" src="https://img.shields.io/badge/Debian-supported-A81D33?logo=debian&logoColor=white">
+  <img alt="KVM" src="https://img.shields.io/badge/KVM%2Flibvirt-virtualization-6E40C9">
+  <img alt="License" src="https://img.shields.io/badge/License-MIT-green">
+</p>
 
-## Workflows
+---
+
+## Overview
+
+`dev-genesis` is my Ansible project for rebuilding and maintaining a clean developer environment.
+
+It replaces one-off shell setup scripts with a structured, repeatable, and safer automation model for:
+
+* workstation setup
+* package installation/removal
+* dotfiles bootstrap
+* desktop/display-specific configuration
+* Android development setup
+* Docker Engine setup
+* KVM/libvirt host setup
+* workstation backup and restore
+* local Linux VM backup and restore
+
+The project is designed to grow across distros and machine profiles without becoming a pile of disconnected scripts.
+
+---
+
+## Current scope
+
+| Area               |          Status | Notes                                                    |
+| ------------------ | --------------: | -------------------------------------------------------- |
+| Fedora workstation |          Active | Main target right now                                    |
+| Debian workstation |         Partial | Catalog and role paths exist, but Fedora is the priority |
+| Dotfiles           |          Active | External repo, applied by convention                     |
+| Docker Engine      |          Active | CLI/Engine setup, no Docker Desktop                      |
+| Android Dev        |          Active | SDK, command-line tools, AVDs, Android Studio archives   |
+| KVM/libvirt host   |          Active | QEMU, libvirt services, permissions, tuned profile       |
+| Backup/restore     |          Active | Workstation data backup/restore with confirmation flags  |
+| VM backup/restore  |          Active | Local Linux libvirt VM disk/XML backup and restore       |
+| NVIDIA             | Planned/skipped | Separate playbook, not part of the current test path     |
+| VM guest config    | Planned/skipped | Separate playbook, not part of the current test path     |
+
+---
+
+## Repository model
 
 ```text
-playbooks/workstation.yml          # setup real developer machine
-playbooks/setup_dotfiles.yml       # apply dotfiles/configuration only
-playbooks/backup_restore.yml       # restore backup folders
-playbooks/setup_nvidia.yml         # setup NVIDIA drivers/config
-playbooks/setup_vms.yml            # create/manage VMs from host
-playbooks/setup_vm_guests.yml      # configure inside guest VMs
+dev-genesis/
+├── ansible.cfg
+├── requirements.yml
+├── inventories/
+│   └── workstation/
+├── playbooks/
+├── roles/
+├── vars/
+├── templates/
+├── files/
+└── vault/
 ```
+
+| Directory      | Purpose                                             |
+| -------------- | --------------------------------------------------- |
+| `playbooks/`   | User-facing entry points                            |
+| `roles/`       | Reusable automation units                           |
+| `vars/`        | Catalogs, package lists, VM data, role inputs       |
+| `inventories/` | Machine identity and target groups                  |
+| `templates/`   | Generated configuration files                       |
+| `files/`       | Static support files                                |
+| `vault/`       | Private/secret values, excluded from normal commits |
+
+---
 
 ## Target identity
 
-Workstation identity is explicit in `inventories/workstation/host_vars/workstation_local.yml`:
+The workstation inventory declares the machine identity explicitly:
 
 ```yaml
-target_distro: fedora        # fedora | debian
-desktop_environment: kde     # gnome | kde | cinnamon
-display_server: wayland      # xorg | wayland
-dotfiles_profile: modern
 machine_profile: workstation
+
+target_distro: fedora
+desktop_environment: kde
+display_server: wayland
+dotfiles_profile: modern
 ```
 
-`checkhost` validates this before dangerous or opinionated setup.
+The `checkhost` role validates machine identity before running opinionated or destructive setup.
+
+This avoids accidentally applying workstation automation to the wrong machine.
+
+---
+
+## Main playbooks
+
+| Playbook                        | Purpose                                           |
+| ------------------------------- | ------------------------------------------------- |
+| `playbooks/workstation.yml`     | Full developer workstation setup                  |
+| `playbooks/setup_dotfiles.yml`  | Dotfiles only                                     |
+| `playbooks/backup.yml`          | Backup workstation data                           |
+| `playbooks/restore.yml`         | Restore workstation data                          |
+| `playbooks/setup_vms.yml`       | Prepare virtualization host and restore local VMs |
+| `playbooks/backup_vms.yml`      | Back up local Linux libvirt VMs                   |
+| `playbooks/restore_vms.yml`     | Restore local Linux libvirt VMs                   |
+| `playbooks/setup_nvidia.yml`    | NVIDIA setup, intentionally isolated              |
+| `playbooks/setup_vm_guests.yml` | Guest VM configuration, intentionally isolated    |
+
+---
 
 ## Workstation flow
 
-```text
-roles/workstation/tasks/main.yml
-  remove_software.yml
-  setup_folders.yml
-  install_generic_software.yml
-  setup_desktop.yml
-  setup_display.yml
-  setup_specialized_software.yml
-  setup_configuration.yml
-  optimize.yml
-```
+`playbooks/workstation.yml` runs focused roles directly:
 
-## Software model
+| Role                  | Responsibility                                 |
+| --------------------- | ---------------------------------------------- |
+| `software`            | Install/remove generic software from catalogs  |
+| `folders`             | Create standard home directories               |
+| `dotfiles`            | Clone and apply the external dotfiles repo     |
+| `desktop`             | Desktop-specific setup: KDE, GNOME, Cinnamon   |
+| `display`             | Display-server-specific setup: Xorg or Wayland |
+| `optimize`            | System-level workstation tuning                |
+| `mise`                | Runtime/tool version manager setup             |
+| `android_dev`         | Android SDK, AVDs, Android Studio versions     |
+| `docker`              | Docker Engine and user permissions             |
+| `virtualization_host` | KVM/libvirt host setup                         |
+| `tmux`                | tmux and plugin manager setup                  |
 
-Generic software is catalog-driven:
+---
+
+## Software catalog
+
+Generic installs are catalog-driven.
 
 ```text
 vars/software/fedora/install.yml
@@ -54,38 +145,178 @@ vars/software/debian/install.yml
 vars/software/debian/remove.yml
 ```
 
-Method names map directly to task paths:
+Example:
 
-```text
-method: redhat/dnf              -> roles/software/tasks/install/redhat/dnf.yml
-method: common/archive_to_opt   -> roles/software/tasks/install/common/archive_to_opt.yml
+```yaml
+software_install:
+  - method: redhat/dnf
+    package: bat
+
+  - name: brave
+    method: redhat/rpm_repository
+    package: brave-browser
+    repo:
+      mode: repofile_url
+      filename: brave-browser.repo
+      url: https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+
+  - name: postman
+    method: common/archive_to_opt
+    url: https://dl.pstmn.io/download/latest/linux64
+    archive_name: postman.tar.gz
+    destination: "{{ ansible_user_dir }}/opt/postman"
+    strip_components: 1
 ```
 
-Use `roles/software` for simple installs. Use dedicated roles for software/environments with meaningful setup steps: `mise`, `tmux`, `lunarvim`, `android_dev`, `docker`, `virtualization_host`, and `nvidia`.
+Supported install methods:
+
+| Family             | Methods                                                                                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Red Hat/Fedora     | `redhat/dnf`, `redhat/copr`, `redhat/rpm_url`, `redhat/rpm_repository`, `redhat/github_release_rpm`                                                                 |
+| Debian/Ubuntu/Mint | `debian/apt`, `debian/ppa`, `debian/deb_url`, `debian/apt_repository`, `debian/github_release_deb`                                                                  |
+| Common             | `common/package`, `common/appimage`, `common/archive_to_opt`, `common/archive_to_fonts`, `common/github_release_archive`, `common/git_repo`, `common/remote_script` |
+
+Use the `software` role for simple install/remove operations. Use dedicated roles when setup has meaningful behavior beyond installing a package.
+
+---
+
+## Dedicated roles
+
+Some tools get their own role because they need validation, configuration, generated files, permissions, services, or multi-step setup.
+
+| Role                         | Why it is dedicated                                           |
+| ---------------------------- | ------------------------------------------------------------- |
+| `mise`                       | Bash activation, completions, global runtime support          |
+| `tmux`                       | TPM and theme repository setup                                |
+| `android_dev`                | SDK root, command-line tools, licenses, AVDs, Studio archives |
+| `docker`                     | Official repository, packages, service, group membership      |
+| `virtualization_host`        | QEMU/libvirt packages, services, groups, ACLs, tuned profile  |
+| `backup` / `restore`         | Explicit data movement with safety confirmation               |
+| `vms_backup` / `vms_restore` | VM disk/XML backup and restore workflow                       |
+
+---
 
 ## Dotfiles
 
-Dotfiles are external. `DOTFILES_SPEC.md` defines the contract. The dotfiles role is expected to clone/pull the repo, validate it, then apply base, desktop, display, distro, and profile-specific configuration.
+Dotfiles are intentionally kept in a separate repository.
 
-## Commands
+`dev-genesis` only owns the automation flow:
+
+```text
+clone dotfiles repo
+run dotfiles installer
+let dotfiles own shell/desktop/app configuration
+```
+
+The current role trusts the dotfiles repo convention and expects an installer at the repository root.
+
+---
+
+## Android development
+
+The `android_dev` role manages:
+
+| Component                     | Path                                     |
+| ----------------------------- | ---------------------------------------- |
+| Android SDK                   | `~/opt/android-sdk`                      |
+| Command-line tools            | `~/opt/android-sdk/cmdline-tools/latest` |
+| AVD home                      | `~/.config/android/avd`                  |
+| Android Studio install root   | `~/opt/android-studio`                   |
+| Android Studio archive source | `~/Downloads/AndroidStudioVersions`      |
+
+Android Studio versions are restored from local archives matching:
+
+```text
+android-studio-*.tar.gz
+```
+
+This keeps Android Studio installation reproducible without depending on a changing remote download page.
+
+---
+
+## Virtualization
+
+The `virtualization_host` role prepares a local KVM/libvirt workstation host.
+
+It handles:
+
+* QEMU/KVM packages
+* libvirt services
+* VirtIO support for Windows guests
+* user group permissions
+* `/var/lib/libvirt/images` ACLs
+* tuned virtualization profile
+* optional IOMMU boot arguments
+* `virt-host-validate qemu`
+
+VM backup and restore are separated into dedicated roles:
+
+| Role          | Responsibility                                              |
+| ------------- | ----------------------------------------------------------- |
+| `vms_backup`  | Export VM domain XML and copy QCOW2 disks                   |
+| `vms_restore` | Restore QCOW2 disks, restore SELinux labels, define domains |
+
+Current VM workflow is focused on local Linux libvirt VMs.
+
+---
+
+## Requirements
+
+Install required Ansible collections:
 
 ```bash
 ansible-galaxy install -r requirements.yml
-
-ansible-playbook -i inventories/workstation/hosts.yml playbooks/workstation.yml --check --diff
-ansible-playbook -i inventories/workstation/hosts.yml playbooks/workstation.yml
-
-ansible-playbook -i inventories/workstation/hosts.yml playbooks/setup_dotfiles.yml
-ansible-playbook -i inventories/workstation/hosts.yml playbooks/backup_restore.yml
-ansible-playbook -i inventories/workstation/hosts.yml playbooks/setup_nvidia.yml
-
 ```
 
-## Rules
+Collections used:
 
-```text
-Generic installs go through the software catalog.
-Complex setup gets a dedicated role.
-Machine identity must be declared.
-Dotfiles stay external and follow DOTFILES_SPEC.md.
+```yaml
+collections:
+  - name: community.general
+  - name: community.libvirt
+  - name: community.docker
+  - name: ansible.posix
 ```
+
+---
+
+## Example workstation inventory
+
+```yaml
+all:
+  children:
+    workstation:
+      hosts:
+        workstation_local:
+          ansible_connection: local
+          ansible_host: localhost
+```
+
+Example host vars:
+
+```yaml
+machine_profile: workstation
+
+target_distro: fedora
+desktop_environment: kde
+display_server: wayland
+dotfiles_profile: modern
+
+confirm_workstation_setup: true
+confirm_dotfiles_setup: true
+confirm_backup: false
+confirm_restore: false
+confirm_nvidia_setup: false
+
+dotfiles_repo_url: "https://github.com/Brunobrlk/dotfiles.git"
+
+backup_restore_external_drive_mount: "/run/media/{{ ansible_user_id }}/Bruno"
+backup_restore_source_name: backup-latest
+backup_restore_source_path: "{{ backup_restore_external_drive_mount }}/{{ backup_restore_source_name }}"
+```
+
+---
+
+## License
+
+MIT
