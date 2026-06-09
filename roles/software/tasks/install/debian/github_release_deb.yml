@@ -6,29 +6,22 @@
   changed_when: false
   failed_when: false
 
-- name: Fetch latest GitHub release for {{ software_label }}
-  ansible.builtin.uri:
-    url: "https://api.github.com/repos/{{ software_item.github_repo }}/releases/latest"
-    return_content: true
-  register: github_deb_latest_release
-  changed_when: false
-
-- name: Resolve GitHub DEB release values for {{ software_label }}
+- name: Resolve installed DEB version for {{ software_label }}
   ansible.builtin.set_fact:
     github_deb_installed_version_value: >-
-      {{ github_deb_installed_version.stdout if github_deb_installed_version.rc == 0 else 'none' }}
-    github_deb_latest_tag_value: "{{ github_deb_latest_release.json.tag_name }}"
-    github_deb_latest_version_value: >-
-      {{ github_deb_latest_release.json.tag_name | regex_replace('^' ~ (software_item.version_prefix_to_remove | default('')), '') }}
+      {{
+        github_deb_installed_version.stdout
+        if github_deb_installed_version.rc == 0
+        else 'none'
+      }}
 
-- name: Resolve GitHub DEB download URL for {{ software_label }}
-  ansible.builtin.set_fact:
-    github_deb_download_url: >-
-      https://github.com/{{ software_item.github_repo }}/releases/download/{{ github_deb_latest_tag_value }}/{{ software_item.asset_pattern | replace('{version}', github_deb_latest_version_value) }}
+- name: Resolve GitHub release DEB asset for {{ software_label }}
+  ansible.builtin.include_tasks:
+    file: "{{ role_path }}/tasks/install/common/resolve_github_release_asset.yml"
 
 - name: Install or upgrade {{ software_label }} from GitHub release DEB
-  ansible.builtin.apt:
-    deb: "{{ github_deb_download_url }}"
-    state: present
   become: true
-  when: github_deb_installed_version_value != github_deb_latest_version_value
+  ansible.builtin.apt:
+    deb: "{{ github_release_download_url }}"
+    state: present
+  when: github_deb_installed_version_value != github_release_latest_version_value

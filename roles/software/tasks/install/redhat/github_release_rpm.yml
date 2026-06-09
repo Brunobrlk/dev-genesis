@@ -6,31 +6,23 @@
   changed_when: false
   failed_when: false
 
-- name: Fetch latest GitHub release for {{ software_label }}
-  ansible.builtin.uri:
-    url: "https://api.github.com/repos/{{ software_item.github_repo }}/releases/latest"
-    return_content: true
-  register: github_rpm_latest_release
-  changed_when: false
-
-- name: Resolve GitHub RPM release values for {{ software_label }}
+- name: Resolve installed RPM version for {{ software_label }}
   ansible.builtin.set_fact:
     github_rpm_installed_version_value: >-
-      {{ github_rpm_installed_version.stdout if github_rpm_installed_version.rc == 0 else 'none' }}
-    github_rpm_latest_tag_value: "{{ github_rpm_latest_release.json.tag_name }}"
-    github_rpm_latest_version_value: >-
-      {{ github_rpm_latest_release.json.tag_name | regex_replace('^' ~ (software_item.version_prefix_to_remove | default('')), '') }}
+      {{
+        github_rpm_installed_version.stdout
+        if github_rpm_installed_version.rc == 0
+        else 'none'
+      }}
 
-- name: Resolve GitHub RPM download URL for {{ software_label }}
-  ansible.builtin.set_fact:
-    github_rpm_asset_name: "{{ software_item.asset_pattern | replace('{version}', github_rpm_latest_version_value) }}"
-    github_rpm_download_url: >-
-      https://github.com/{{ software_item.github_repo }}/releases/download/{{ github_rpm_latest_tag_value }}/{{ software_item.asset_pattern | replace('{version}', github_rpm_latest_version_value) }}
+- name: Resolve GitHub release RPM asset for {{ software_label }}
+  ansible.builtin.include_tasks:
+    file: "{{ role_path }}/tasks/install/common/resolve_github_release_asset.yml"
 
 - name: Install or upgrade {{ software_label }} from GitHub release RPM
+  become: true
   ansible.builtin.dnf:
-    name: "{{ github_rpm_download_url }}"
+    name: "{{ github_release_download_url }}"
     state: present
     disable_gpg_check: "{{ not (software_item.gpg_check | default(true)) }}"
-  become: true
-  when: github_rpm_installed_version_value != github_rpm_latest_version_value
+  when: github_rpm_installed_version_value != github_release_latest_version_value

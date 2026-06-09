@@ -65,8 +65,7 @@ software_install:
     method: redhat/github_release_rpm
     package: dbeaver-ce
     github_repo: dbeaver/dbeaver
-    version_prefix_to_remove: v
-    asset_pattern: dbeaver-ce-{version}-stable.x86_64.rpm
+    asset_pattern: dbeaver-ce-{version}-linux-x86_64.rpm
     gpg_check: false
 
   - name: postman

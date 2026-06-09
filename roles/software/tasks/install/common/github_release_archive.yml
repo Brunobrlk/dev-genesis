@@ -1,22 +1,7 @@
 ---
-- name: Fetch latest GitHub release for {{ software_label }}
-  ansible.builtin.uri:
-    url: "https://api.github.com/repos/{{ software_item.github_repo }}/releases/latest"
-    return_content: true
-  register: github_archive_latest_release
-  changed_when: false
-
-- name: Resolve GitHub archive release values for {{ software_label }}
-  ansible.builtin.set_fact:
-    github_archive_latest_tag_value: "{{ github_archive_latest_release.json.tag_name }}"
-    github_archive_latest_version_value: >-
-      {{ github_archive_latest_release.json.tag_name | regex_replace('^' ~ (software_item.version_prefix_to_remove | default('')), '') }}
-    github_archive_asset_name: "{{ software_item.asset_pattern | replace('{version}', github_archive_latest_release.json.tag_name | regex_replace('^' ~ (software_item.version_prefix_to_remove | default('')), '')) }}"
-
-- name: Resolve GitHub archive download URL for {{ software_label }}
-  ansible.builtin.set_fact:
-    github_archive_download_url: >-
-      https://github.com/{{ software_item.github_repo }}/releases/download/{{ github_archive_latest_tag_value }}/{{ github_archive_asset_name }}
+- name: Resolve GitHub release archive asset for {{ software_label }}
+  ansible.builtin.include_tasks:
+    file: "{{ role_path }}/tasks/install/common/resolve_github_release_asset.yml"
 
 - name: Ensure destination exists for {{ software_label }}
   ansible.builtin.file:
@@ -26,13 +11,13 @@
 
 - name: Download GitHub release archive for {{ software_label }}
   ansible.builtin.get_url:
-    url: "{{ github_archive_download_url }}"
-    dest: "/tmp/{{ github_archive_asset_name }}"
+    url: "{{ github_release_download_url }}"
+    dest: "/tmp/{{ github_release_asset_name }}"
     mode: "0644"
 
 - name: Extract GitHub release archive for {{ software_label }}
   ansible.builtin.unarchive:
-    src: "/tmp/{{ github_archive_asset_name }}"
+    src: "/tmp/{{ github_release_asset_name }}"
     dest: "{{ software_item.destination }}"
     remote_src: true
 

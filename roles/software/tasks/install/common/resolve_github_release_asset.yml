@@ -1,0 +1,47 @@
+---
+- name: Fetch latest GitHub release for {{ software_label }}
+  ansible.builtin.uri:
+    url: "https://api.github.com/repos/{{ software_item.github_repo }}/releases/latest"
+    return_content: true
+  register: github_release_latest_release
+  changed_when: false
+
+- name: Resolve GitHub release version for {{ software_label }}
+  ansible.builtin.set_fact:
+    github_release_latest_tag_value: "{{ github_release_latest_release.json.tag_name }}"
+    github_release_latest_version_value: >-
+      {{
+        github_release_latest_release.json.tag_name
+        | regex_replace('^' ~ (software_item.version_prefix_to_remove | default('')), '')
+      }}
+
+- name: Resolve GitHub release asset name for {{ software_label }}
+  ansible.builtin.set_fact:
+    github_release_asset_name: >-
+      {{
+        software_item.asset_pattern
+        | replace('{version}', github_release_latest_version_value)
+      }}
+
+- name: Find GitHub release asset for {{ software_label }}
+  ansible.builtin.set_fact:
+    github_release_matching_assets: >-
+      {{
+        github_release_latest_release.json.assets
+        | selectattr('name', 'equalto', github_release_asset_name)
+        | list
+      }}
+
+- name: Validate GitHub release asset exists for {{ software_label }}
+  ansible.builtin.assert:
+    that:
+      - github_release_matching_assets | length == 1
+    fail_msg: >-
+      Could not find asset '{{ github_release_asset_name }}'
+      in {{ software_item.github_repo }} release {{ github_release_latest_tag_value }}.
+      Available assets:
+      {{ github_release_latest_release.json.assets | map(attribute='name') | list | join(', ') }}
+
+- name: Resolve GitHub release download URL for {{ software_label }}
+  ansible.builtin.set_fact:
+    github_release_download_url: "{{ github_release_matching_assets[0].browser_download_url }}"
