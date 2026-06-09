@@ -81,12 +81,14 @@ software_install:
     copr: zeno/scrcpy
     package: scrcpy
 
-  - name: scrcpy
+  - name: starship
     method: redhat/copr
     copr: atim/starship
     package: starship
 
-  - method: redhat/dnf
+  - name: yazi
+    method: redhat/copr
+    copr: lihaohong/yazi
     package: yazi
 
   - name: jetbrains_mono_nerdfont
