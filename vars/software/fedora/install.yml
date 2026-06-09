@@ -81,8 +81,9 @@ software_install:
     copr: zeno/scrcpy
     package: scrcpy
 
-
-  - method: redhat/dnf
+  - name: scrcpy
+    method: redhat/copr
+    copr: atim/starship
     package: starship
 
   - method: redhat/dnf
