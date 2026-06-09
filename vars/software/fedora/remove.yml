@@ -1,7 +1,21 @@
 ---
 software_remove:
-  - method: redhat/dnf
-    package: flatpak
+  - name: fedora-installer-flatpak-leftovers
+    method: redhat/dnf
+    packages:
+      - slitherer
+      - anaconda-live
+      - anaconda-tui
+      - anaconda-webui
+      - kdump-anaconda-addon
+      - anaconda-core
+      - plasma-welcome-fedora
+      - plasma-discover-flatpak
+      - flatpak-kcm
+      - fedora-flathub-remote
+      - flatpak
+      - flatpak-libs
 
-  - method: redhat/dnf
+  - name: snapd
+    method: redhat/dnf
     package: snapd
