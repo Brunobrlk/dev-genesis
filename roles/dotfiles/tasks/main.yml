@@ -6,6 +6,12 @@
   vars:
     software_items: "{{ dotfiles_dependencies }}"
 
+- name: Create dotfiles repository directory
+  become: false
+  ansible.builtin.file:
+    path: "{{ dotfiles_repo_dest }}"
+    state: directory
+
 - name: Clone dotfiles repository
   ansible.builtin.git:
     repo: "{{ dotfiles_repo_url }}"
