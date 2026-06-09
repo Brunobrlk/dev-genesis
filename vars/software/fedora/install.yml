@@ -76,8 +76,11 @@ software_install:
     strip_components: 1
     creates: "{{ ansible_user_dir }}/opt/postman/Postman"
 
-  - method: redhat/dnf
+  - name: scrcpy
+    method: redhat/copr
+    copr: zeno/scrcpy
     package: scrcpy
+
 
   - method: redhat/dnf
     package: starship
