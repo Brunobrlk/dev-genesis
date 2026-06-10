@@ -6,3 +6,26 @@ docker_service_name: docker
 docker_add_user_to_group: true
 docker_enable_service: true
 docker_start_service: true
+
+docker_fedora_conflicting_packages:
+  - docker
+  - docker-client
+  - docker-client-latest
+  - docker-common
+  - docker-latest
+  - docker-latest-logrotate
+  - docker-logrotate
+  - docker-selinux
+  - docker-engine-selinux
+  - docker-engine
+
+docker_fedora_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+
+docker_fedora_repo_url: https://download.docker.com/linux/fedora/docker-ce.repo
+docker_fedora_repo_dest: /etc/yum.repos.d/docker-ce.repo
+docker_fedora_gpg_key: https://download.docker.com/linux/fedora/gpg

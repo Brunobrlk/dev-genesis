@@ -1,19 +1,23 @@
 ---
-- name: Remove conflicting Docker packages on Fedora
+- name: Gather installed package facts on Fedora
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Resolve installed conflicting Docker packages on Fedora
+  ansible.builtin.set_fact:
+    docker_fedora_installed_conflicting_packages: >-
+      {{
+        docker_fedora_conflicting_packages
+        | select('in', ansible_facts.packages.keys() | list)
+        | list
+      }}
+
+- name: Remove installed conflicting Docker packages on Fedora
   become: true
   ansible.builtin.dnf:
-    name:
-      - docker
-      - docker-client
-      - docker-client-latest
-      - docker-common
-      - docker-latest
-      - docker-latest-logrotate
-      - docker-logrotate
-      - docker-selinux
-      - docker-engine-selinux
-      - docker-engine
+    name: "{{ docker_fedora_installed_conflicting_packages }}"
     state: absent
+  when: docker_fedora_installed_conflicting_packages | length > 0
 
 - name: Install DNF plugin dependency for Docker repository
   become: true
@@ -21,11 +25,17 @@
     name: dnf-plugins-core
     state: present
 
+- name: Add Docker Fedora GPG key
+  become: true
+  ansible.builtin.rpm_key:
+    key: "{{ docker_fedora_gpg_key }}"
+    state: present
+
 - name: Add Docker Fedora repository
   become: true
   ansible.builtin.get_url:
-    url: https://download.docker.com/linux/fedora/docker-ce.repo
-    dest: /etc/yum.repos.d/docker-ce.repo
+    url: "{{ docker_fedora_repo_url }}"
+    dest: "{{ docker_fedora_repo_dest }}"
     owner: root
     group: root
     mode: "0644"
@@ -33,11 +43,6 @@
 - name: Install Docker Engine packages on Fedora
   become: true
   ansible.builtin.dnf:
-    name:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-      - docker-buildx-plugin
-      - docker-compose-plugin
+    name: "{{ docker_fedora_packages }}"
     state: present
     update_cache: true
