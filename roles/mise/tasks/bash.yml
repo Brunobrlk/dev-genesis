@@ -19,9 +19,8 @@
 
 - name: Check whether usage is installed by mise
   ansible.builtin.command:
-    cmd: mise where usage
-  environment:
-    PATH: "{{ mise_path | join(':') }}"
+    cmd: "{{ mise_executable }} where usage"
+  environment: "{{ mise_environment }}"
   register: mise_usage_check
   changed_when: false
   failed_when: false
@@ -31,9 +30,8 @@
 
 - name: Install usage for mise completions
   ansible.builtin.command:
-    cmd: mise use -g usage
-  environment:
-    PATH: "{{ mise_path | join(':') }}"
+    cmd: "{{ mise_executable }} use -g usage"
+  environment: "{{ mise_environment }}"
   changed_when: true
   when:
     - mise_install_bash_completion | bool
@@ -48,12 +46,11 @@
 
 - name: Generate mise bash completion
   ansible.builtin.shell: >
-    mise completion bash --include-bash-completion-lib
+    {{ mise_executable | quote }} completion bash --include-bash-completion-lib
     > {{ mise_bash_completion_file | quote }}
   args:
     executable: /bin/bash
-  environment:
-    PATH: "{{ mise_path | join(':') }}"
+  environment: "{{ mise_environment }}"
   changed_when: true
   when:
     - mise_install_bash_completion | bool

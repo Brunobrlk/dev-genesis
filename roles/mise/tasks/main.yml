@@ -19,15 +19,18 @@
   vars:
     software_items: "{{ mise_install }}"
 
-- name: Assert mise executable exists
-  ansible.builtin.stat:
-    path: "{{ mise_executable }}"
-  register: mise_executable_stat
+- name: Resolve mise executable
+  ansible.builtin.shell: command -v mise
+  args:
+    executable: /bin/bash
+  environment: "{{ mise_environment }}"
+  register: mise_executable_command
+  changed_when: false
+  failed_when: mise_executable_command.rc != 0
 
-- name: Fail when mise executable was not installed
-  ansible.builtin.fail:
-    msg: "mise was expected at {{ mise_executable }}, but it was not found."
-  when: not mise_executable_stat.stat.exists
+- name: Set mise executable path
+  ansible.builtin.set_fact:
+    mise_executable: "{{ mise_executable_command.stdout }}"
 
 - name: Configure mise for bash
   ansible.builtin.include_tasks: bash.yml

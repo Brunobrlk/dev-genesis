@@ -1,13 +1,17 @@
 ---
 mise_configure_bash: true
 mise_install_config_tools: true
+mise_install_bash_completion: true
+mise_install_usage_for_completion: true
+mise_force_regenerate_completion: false
 
-mise_bin_dir: "{{ ansible_user_dir }}/.local/bin"
 mise_shims_dir: "{{ ansible_user_dir }}/.local/share/mise/shims"
-mise_executable: "{{ mise_bin_dir }}/mise"
 mise_config_file: "{{ ansible_user_dir }}/.config/mise/config.toml"
+mise_bashrc_path: "{{ ansible_user_dir }}/.bashrc"
+mise_bash_completion_dir: "{{ ansible_user_dir }}/.local/share/bash-completion/completions"
+mise_bash_completion_file: "{{ mise_bash_completion_dir }}/mise"
 
-mise_ansible_path: "{{ mise_shims_dir }}:{{ mise_bin_dir }}:/usr/local/bin:/usr/bin:/bin"
+mise_ansible_path: "{{ mise_shims_dir }}:/usr/local/bin:/usr/bin:/bin"
 
 mise_environment:
   PATH: "{{ mise_ansible_path }}"
