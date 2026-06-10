@@ -1,11 +1,17 @@
 ---
+- name: Read CPU info
+  ansible.builtin.slurp:
+    src: /proc/cpuinfo
+  register: virtualization_host_cpuinfo
+
 - name: Validate CPU hardware virtualization support
   ansible.builtin.assert:
     that:
       - >-
-        ('vmx' in (ansible_facts.processor_flags | default([])))
+        (' vmx ' in (' ' ~ (virtualization_host_cpuinfo.content | b64decode) ~ ' '))
         or
-        ('svm' in (ansible_facts.processor_flags | default([])))
+        (' svm ' in (' ' ~ (virtualization_host_cpuinfo.content | b64decode) ~ ' '))
     fail_msg: >-
       CPU does not expose hardware virtualization support.
-      Enable Intel VT-x or AMD-V in BIOS/UEFI, then run this role again.
+      Enable Intel VT-x or AMD-V in BIOS/UEFI.
+      If this is a VM, enable nested virtualization and CPU host-passthrough.
