@@ -2,7 +2,10 @@
 - name: Accept Android SDK licenses
   ansible.builtin.shell: |
     set -o pipefail
-    yes | {{ android_sdkmanager_path | quote }} --sdk_root={{ android_sdk_root | quote }} --licenses >/dev/null
+    yes | "{{ android_sdkmanager_path }}" --sdk_root="{{ android_sdk_root }}" --licenses >/dev/null
   args:
     executable: /bin/bash
+  environment: "{{ android_environment }}"
+  register: android_accept_licenses
   changed_when: false
+  failed_when: android_accept_licenses.rc not in [0, 141]
