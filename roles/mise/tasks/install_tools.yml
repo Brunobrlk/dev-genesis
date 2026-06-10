@@ -1,0 +1,38 @@
+---
+- name: Check mise global config exists
+  ansible.builtin.stat:
+    path: "{{ mise_config_file }}"
+  register: mise_config_file_stat
+
+- name: Fail when mise config is missing
+  ansible.builtin.fail:
+    msg: >-
+      mise config was not found at {{ mise_config_file }}.
+      The dotfiles role must run before the mise role so mise can install tools from config.toml.
+  when: not mise_config_file_stat.stat.exists
+
+- name: Trust mise global config
+  ansible.builtin.command:
+    cmd: "{{ mise_executable }} trust {{ mise_config_file }}"
+  environment: "{{ mise_environment }}"
+  changed_when: false
+
+- name: Check whether mise tools need installation
+  ansible.builtin.command:
+    cmd: "{{ mise_executable }} install --dry-run-code"
+  environment: "{{ mise_environment }}"
+  register: mise_install_check
+  changed_when: mise_install_check.rc == 1
+  failed_when: mise_install_check.rc not in [0, 1]
+
+- name: Install mise tools from config
+  ansible.builtin.command:
+    cmd: "{{ mise_executable }} install"
+  environment: "{{ mise_environment }}"
+  when: mise_install_check.rc == 1
+
+- name: Rebuild mise shims
+  ansible.builtin.command:
+    cmd: "{{ mise_executable }} reshim"
+  environment: "{{ mise_environment }}"
+  changed_when: false

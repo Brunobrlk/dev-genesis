@@ -19,6 +19,25 @@
   vars:
     software_items: "{{ mise_install }}"
 
+- name: Assert mise executable exists
+  ansible.builtin.stat:
+    path: "{{ mise_executable }}"
+  register: mise_executable_stat
+
+- name: Fail when mise executable was not installed
+  ansible.builtin.fail:
+    msg: "mise was expected at {{ mise_executable }}, but it was not found."
+  when: not mise_executable_stat.stat.exists
+
 - name: Configure mise for bash
   ansible.builtin.include_tasks: bash.yml
   when: mise_configure_bash | bool
+
+- name: Install mise tools from config
+  ansible.builtin.include_tasks: install_tools.yml
+  when: mise_install_config_tools | bool
+
+- name: Export mise environment for later roles
+  ansible.builtin.set_fact:
+    mise_environment:
+      PATH: "{{ mise_ansible_path }}"
