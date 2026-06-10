@@ -5,23 +5,14 @@
     state: directory
     mode: "0755"
 
-- name: Read installed Android SDK packages before AVD setup
-  ansible.builtin.command:
-    argv:
-      - "{{ android_sdkmanager_path }}"
-      - "--sdk_root={{ android_sdk_root }}"
-      - "--list_installed"
-  register: android_avd_sdk_installed_list
+- name: Check Android AVD system image markers
+  ansible.builtin.stat:
+    path: "{{ android_sdk_root }}/{{ item | regex_replace('^system-images;', 'system-images/') | replace(';', '/') }}"
+  register: android_avd_system_image_markers
+  loop: "{{ android_avd_system_images }}"
+  loop_control:
+    label: "{{ item }}"
   changed_when: false
-
-- name: Parse installed Android SDK packages before AVD setup
-  ansible.builtin.set_fact:
-    android_avd_sdk_installed_packages: >-
-      {{
-        android_avd_sdk_installed_list.stdout_lines
-        | map('regex_replace', '^\\s*([^\\s]+).*$', '\\1')
-        | list
-      }}
 
 - name: Install Android AVD system images
   ansible.builtin.command:
@@ -32,7 +23,8 @@
   loop: "{{ android_avd_system_images }}"
   loop_control:
     label: "{{ item }}"
-  when: item not in android_avd_sdk_installed_packages
+    index_var: android_avd_system_image_index
+  when: not android_avd_system_image_markers.results[android_avd_system_image_index].stat.exists
   changed_when: true
 
 - name: Read existing Android virtual devices

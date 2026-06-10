@@ -1,21 +1,40 @@
 ---
-- name: Read installed Android SDK packages
-  ansible.builtin.command:
-    argv:
-      - "{{ android_sdkmanager_path }}"
-      - "--sdk_root={{ android_sdk_root }}"
-      - "--list_installed"
-  register: android_sdk_installed_list
-  changed_when: false
-
-- name: Parse installed Android SDK package names
-  ansible.builtin.set_fact:
-    android_sdk_installed_packages: >-
+- name: Check Android SDK package markers
+  ansible.builtin.find:
+    paths: "{{ android_sdk_marker_parent }}"
+    patterns:
+      - "{{ android_sdk_marker_pattern }}"
+    recurse: false
+    file_type: "{{ android_sdk_marker_type }}"
+  register: android_sdk_package_markers
+  loop: "{{ android_sdk_packages }}"
+  loop_control:
+    label: "{{ item }}"
+  vars:
+    android_sdk_marker_parent: >-
       {{
-        android_sdk_installed_list.stdout_lines
-        | map('regex_replace', '^\\s*([^\\s]+).*$', '\\1')
-        | list
+        android_sdk_root ~ '/platform-tools'
+        if item == 'platform-tools'
+        else android_sdk_root ~ '/emulator'
+        if item == 'emulator'
+        else android_sdk_root ~ '/build-tools'
+        if item is match('^build-tools;')
+        else android_sdk_root ~ '/platforms'
+        if item is match('^platforms;')
+        else android_sdk_root ~ '/sources'
       }}
+    android_sdk_marker_pattern: >-
+      {{
+        'adb'
+        if item == 'platform-tools'
+        else 'emulator'
+        if item == 'emulator'
+        else item | regex_replace('^build-tools;', '')
+        if item is match('^build-tools;')
+        else item | regex_replace('^(platforms|sources);', '') ~ '*'
+      }}
+    android_sdk_marker_type: "{{ 'file' if item in ['platform-tools', 'emulator'] else 'directory' }}"
+  changed_when: false
 
 - name: Install Android SDK packages
   ansible.builtin.command:
@@ -26,5 +45,6 @@
   loop: "{{ android_sdk_packages }}"
   loop_control:
     label: "{{ item }}"
-  when: item not in android_sdk_installed_packages
+    index_var: android_sdk_package_index
+  when: android_sdk_package_markers.results[android_sdk_package_index].matched == 0
   changed_when: true
