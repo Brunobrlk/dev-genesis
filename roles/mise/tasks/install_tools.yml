@@ -25,11 +25,33 @@
   changed_when: mise_install_check.rc == 1
   failed_when: mise_install_check.rc not in [0, 1]
 
-- name: Install mise tools from config
+- name: Get list of missing mise tools
   ansible.builtin.command:
-    cmd: "{{ mise_executable }} install"
+    cmd: "{{ mise_executable }} ls --missing --json"
   environment: "{{ mise_environment }}"
+  register: mise_missing_tools_json
+  changed_when: false
   when: mise_install_check.rc == 1
+
+- name: Install mise tools individually
+  ansible.builtin.command:
+    cmd: "{{ mise_executable }} install {{ item.key }}"
+  environment: "{{ mise_environment }}"
+  loop: "{{ (mise_missing_tools_json.stdout | from_json) | dict2items }}"
+  register: mise_install_results
+  ignore_errors: true
+  when:
+    - mise_install_check.rc == 1
+    - mise_missing_tools_json.stdout is defined
+    - (mise_missing_tools_json.stdout | from_json) | length > 0
+
+- name: Log failed mise tool installations
+  ansible.builtin.debug:
+    msg: "WARNING: Failed to install mise tool '{{ item.item.key }}'. Error: {{ item.stderr | default(item.msg | default('Unknown error')) }}"
+  loop: "{{ mise_install_results.results | default([]) }}"
+  when:
+    - mise_install_check.rc == 1
+    - item.failed | default(false)
 
 - name: Rebuild mise shims
   ansible.builtin.command:
