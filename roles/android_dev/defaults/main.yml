@@ -6,6 +6,7 @@ android_environment:
   ANDROID_HOME: "{{ android_home }}"
   ANDROID_SDK_ROOT: "{{ android_sdk_root }}"
   ANDROID_AVD_HOME: "{{ android_avd_home }}"
+  PATH: "{{ ansible_env.HOME }}/.local/share/mise/shims:{{ ansible_env.PATH }}"
 
 android_cmdline_tools_dir: "{{ android_sdk_root }}/cmdline-tools/latest"
 android_sdkmanager_path: "{{ android_cmdline_tools_dir }}/bin/sdkmanager"
