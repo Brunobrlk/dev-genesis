@@ -1,39 +1,24 @@
 ---
 - name: Check Android SDK package markers
-  ansible.builtin.find:
-    paths: "{{ android_sdk_marker_parent }}"
-    patterns:
-      - "{{ android_sdk_marker_pattern }}"
-    recurse: false
-    file_type: "{{ android_sdk_marker_type }}"
+  ansible.builtin.stat:
+    path: "{{ android_sdk_marker_path }}"
   register: android_sdk_package_markers
   loop: "{{ android_sdk_packages }}"
   loop_control:
     label: "{{ item }}"
   vars:
-    android_sdk_marker_parent: >-
+    android_sdk_marker_path: >-
       {{
-        android_sdk_root ~ '/platform-tools'
+        android_sdk_root ~ '/platform-tools/adb'
         if item == 'platform-tools'
-        else android_sdk_root ~ '/emulator'
+        else android_sdk_root ~ '/emulator/source.properties'
         if item == 'emulator'
-        else android_sdk_root ~ '/build-tools'
+        else android_sdk_root ~ '/build-tools/' ~ (item | regex_replace('^build-tools;', ''))
         if item is match('^build-tools;')
-        else android_sdk_root ~ '/platforms'
+        else android_sdk_root ~ '/platforms/' ~ (item | regex_replace('^platforms;', ''))
         if item is match('^platforms;')
-        else android_sdk_root ~ '/sources'
+        else android_sdk_root ~ '/sources/' ~ (item | regex_replace('^sources;', ''))
       }}
-    android_sdk_marker_pattern: >-
-      {{
-        'adb'
-        if item == 'platform-tools'
-        else 'emulator'
-        if item == 'emulator'
-        else item | regex_replace('^build-tools;', '')
-        if item is match('^build-tools;')
-        else item | regex_replace('^(platforms|sources);', '') ~ '*'
-      }}
-    android_sdk_marker_type: "{{ 'file' if item in ['platform-tools', 'emulator'] else 'directory' }}"
   changed_when: false
 
 - name: Install Android SDK packages
@@ -46,5 +31,5 @@
   loop_control:
     label: "{{ item }}"
     index_var: android_sdk_package_index
-  when: android_sdk_package_markers.results[android_sdk_package_index].matched == 0
+  when: not android_sdk_package_markers.results[android_sdk_package_index].stat.exists
   changed_when: true
