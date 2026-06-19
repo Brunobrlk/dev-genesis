@@ -310,9 +310,7 @@ confirm_nvidia_setup: false
 
 dotfiles_repo_url: "https://github.com/Brunobrlk/dotfiles.git"
 
-backup_restore_external_drive_mount: "/run/media/{{ ansible_user_id }}/Bruno"
-backup_restore_source_name: backup-latest
-backup_restore_source_path: "{{ backup_restore_external_drive_mount }}/{{ backup_restore_source_name }}"
+backup_restore_root: "/run/media/{{ ansible_user_id }}/Bruno/Backups/current"
 ```
 
 ---

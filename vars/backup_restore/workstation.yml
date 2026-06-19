@@ -2,26 +2,27 @@
 items:
   - name: secure-local-share
     local: "{{ ansible_user_dir }}/.local/share/secure/"
-    backup: "{{ backup_restore_source_path }}/home/.local/share/secure/"
+    backup: "{{ backup_restore_root }}/.local/share/secure/"
     mode: "0700"
 
   - name: ssh
     local: "{{ ansible_user_dir }}/.ssh/"
-    backup: "{{ backup_restore_source_path }}/home/.ssh/"
+    backup: "{{ backup_restore_root }}/.ssh/"
     mode: "0700"
 
   - name: gnupg
     local: "{{ ansible_user_dir }}/.gnupg/"
-    backup: "{{ backup_restore_source_path }}/home/.gnupg/"
+    backup: "{{ backup_restore_root }}/.gnupg/"
     mode: "0700"
 
-  - name: bash-config
-    local: "{{ ansible_user_dir }}/.config/bash/"
-    backup: "{{ backup_restore_source_path }}/home/.config/bash/"
+  - name: utils
+    local: "{{ ansible_user_dir }}/.utils/"
+    backup: "{{ backup_restore_root }}/.utils/"
+    mode: "0700"
 
-  - name: development-projects
-    local: "{{ ansible_user_dir }}/Development/projects/"
-    backup: "{{ backup_restore_source_path }}/Development/projects/"
+  - name: development
+    local: "{{ ansible_user_dir }}/Development/"
+    backup: "{{ backup_restore_root }}/Development/"
     rsync_options:
       - --exclude=build/
       - --exclude=.gradle/
@@ -31,17 +32,18 @@ items:
       - --exclude=.venv/
       - --exclude=__pycache__/
 
+  - name: documents
+    local: "{{ ansible_user_dir }}/Documents/"
+    backup: "{{ backup_restore_root }}/Documents/"
+
   - name: videos
-    enabled: false
     local: "{{ ansible_user_dir }}/Videos/"
-    backup: "{{ backup_restore_source_path }}/media/Videos/"
+    backup: "{{ backup_restore_root }}/Videos/"
 
   - name: music
-    enabled: false
     local: "{{ ansible_user_dir }}/Music/"
-    backup: "{{ backup_restore_source_path }}/media/Music/"
+    backup: "{{ backup_restore_root }}/Music/"
 
   - name: pictures
-    enabled: false
     local: "{{ ansible_user_dir }}/Pictures/"
-    backup: "{{ backup_restore_source_path }}/media/Pictures/"
+    backup: "{{ backup_restore_root }}/Pictures/"
