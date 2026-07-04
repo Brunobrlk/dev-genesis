@@ -23,13 +23,17 @@ items:
   - name: development
     local: "{{ ansible_user_dir }}/Development/"
     backup: "{{ backup_restore_root }}/Development/"
-    rsync_options:
+    backup_rsync_options:
+      - --copy-links
       - --exclude=build/
       - --exclude=.gradle/
       - --exclude=node_modules/
       - --exclude=.idea/
       - --exclude=.dart_tool/
       - --exclude=.venv/
+      - --exclude=venv/
+      - --exclude=ephemeral/
+      - --exclude=.plugin_symlinks/
       - --exclude=__pycache__/
 
   - name: documents

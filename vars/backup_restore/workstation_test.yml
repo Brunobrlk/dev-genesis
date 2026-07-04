@@ -1,0 +1,77 @@
+---
+items:
+  - name: secure-local-share-test
+    local: "{{ ansible_user_dir }}/.local/share/secure/"
+    backup: "{{ backup_restore_root }}/_quick_test/.local/share/secure/"
+    mode: "0700"
+    rsync_options:
+      - --include=/README.md
+      - --include=/git/
+      - --include=/git/config.local
+      - --exclude=*
+
+  - name: ssh-test
+    local: "{{ ansible_user_dir }}/.ssh/"
+    backup: "{{ backup_restore_root }}/_quick_test/.ssh/"
+    mode: "0700"
+    rsync_options:
+      - --include=/config
+      - --include=/id_ed25519.pub
+      - --exclude=*
+
+  - name: gnupg-test
+    local: "{{ ansible_user_dir }}/.gnupg/"
+    backup: "{{ backup_restore_root }}/_quick_test/.gnupg/"
+    mode: "0700"
+    rsync_options:
+      - --include=/common.conf
+      - --include=/trustdb.gpg
+      - --exclude=*
+
+  - name: utils-test
+    local: "{{ ansible_user_dir }}/.utils/"
+    backup: "{{ backup_restore_root }}/_quick_test/.utils/"
+    mode: "0700"
+    rsync_options:
+      - --include=/Cheatsheets/
+      - --include=/Cheatsheets/INFO.md
+      - --include=/CodeGists/
+      - --include=/CodeGists/bash.sh
+      - --exclude=*
+
+  - name: development-test
+    local: "{{ ansible_user_dir }}/Development/"
+    backup: "{{ backup_restore_root }}/_quick_test/Development/"
+    rsync_options:
+      - --include=/compiling.txt
+      - --exclude=*
+
+  - name: documents-test
+    local: "{{ ansible_user_dir }}/Documents/"
+    backup: "{{ backup_restore_root }}/_quick_test/Documents/"
+    rsync_options:
+      - --include=/Format/
+      - --include=/Format/README.md
+      - --exclude=*
+
+  - name: videos-test
+    local: "{{ ansible_user_dir }}/Videos/"
+    backup: "{{ backup_restore_root }}/_quick_test/Videos/"
+    rsync_options:
+      - --include=/Dev/
+      - --include=/Dev/activity_lifecycle.mp4
+      - --exclude=*
+
+  - name: music-test
+    local: "{{ ansible_user_dir }}/Music/"
+    backup: "{{ backup_restore_root }}/_quick_test/Music/"
+    rsync_options:
+      - --include=/hello.txt
+      - --exclude=*
+
+  - name: pictures-test
+    local: "{{ ansible_user_dir }}/Pictures/"
+    backup: "{{ backup_restore_root }}/_quick_test/Pictures/"
+    rsync_options:
+      - --include=/test.png
+      - --exclude=*

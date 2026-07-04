@@ -1,0 +1,11 @@
+---
+backup_linux_filesystems:
+  - ext4
+  - btrfs
+  - xfs
+
+unsupported_backup_filesystems:
+  - exfat
+  - vfat
+  - ntfs
+  - ntfs3

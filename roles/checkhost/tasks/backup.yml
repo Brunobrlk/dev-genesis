@@ -24,3 +24,35 @@
       - backup_destination_stat.stat.exists
       - backup_destination_stat.stat.isdir
     fail_msg: "Backup destination root does not exist: {{ backup_restore_root }}"
+
+- name: Detect backup destination filesystem type
+  ansible.builtin.command:
+    argv:
+      - findmnt
+      - --noheadings
+      - --output
+      - FSTYPE
+      - --target
+      - "{{ backup_restore_root }}"
+  register: backup_destination_filesystem
+  changed_when: false
+
+- name: Normalize backup destination filesystem type
+  ansible.builtin.set_fact:
+    backup_destination_filesystem_type: "{{ backup_destination_filesystem.stdout | trim | lower }}"
+
+- name: Fail when backup destination filesystem is explicitly unsupported
+  ansible.builtin.assert:
+    that:
+      - backup_destination_filesystem_type not in unsupported_backup_filesystems
+    fail_msg: >-
+      Backup destination filesystem "{{ backup_destination_filesystem_type }}" is not supported.
+      Use a Linux-native filesystem such as ext4, btrfs, or xfs for {{ backup_restore_root }}.
+
+- name: Validate backup destination filesystem is Linux-compatible
+  ansible.builtin.assert:
+    that:
+      - backup_destination_filesystem_type in backup_linux_filesystems
+    fail_msg: >-
+      Backup destination filesystem "{{ backup_destination_filesystem_type }}" is not allowed.
+      Supported filesystems: {{ backup_linux_filesystems | join(', ') }}.

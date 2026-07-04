@@ -7,5 +7,5 @@
 
 - name: Restore {{ item.name }}
   ansible.builtin.command:
-    argv: "{{ ['rsync', '-a', '--human-readable'] + (item.rsync_options | default([])) + [item.backup, item.local] }}"
+    argv: "{{ ['rsync', '-a', '--human-readable'] + (item.restore_rsync_options | default(item.rsync_options | default([]))) + [item.backup, item.local] }}"
   changed_when: true

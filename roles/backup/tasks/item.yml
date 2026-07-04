@@ -7,5 +7,5 @@
 
 - name: Backup {{ item.name }}
   ansible.builtin.command:
-    argv: "{{ ['rsync', '-a', '--human-readable'] + (item.rsync_options | default([])) + [item.local, item.backup] }}"
+    argv: "{{ ['rsync', '-a', '--human-readable'] + (item.backup_rsync_options | default(item.rsync_options | default([]))) + [item.local, item.backup] }}"
   changed_when: true

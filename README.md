@@ -313,6 +313,26 @@ dotfiles_repo_url: "https://github.com/Brunobrlk/dotfiles.git"
 backup_restore_root: "/run/media/{{ ansible_user_id }}/Bruno/Backups/current"
 ```
 
+Use a Linux-native filesystem for `backup_restore_root`. The backup checks allow
+`ext4`, `btrfs`, and `xfs`, and fail early on `exfat`, `vfat`, `ntfs`, and
+`ntfs3`. `ext4` is the recommended choice.
+
+Quick backup/restore test:
+
+```bash
+ansible-playbook -i inventories/workstation/hosts.yml playbooks/backup.yml \
+  -e confirm_backup=true \
+  -e backup_restore_catalog_file=vars/backup_restore/workstation_test.yml
+
+ansible-playbook -i inventories/workstation/hosts.yml playbooks/restore.yml \
+  -e confirm_restore=true \
+  -e backup_restore_catalog_file=vars/backup_restore/workstation_test.yml
+```
+
+The quick test catalog copies only a small sample set into
+`{{ backup_restore_root }}/_quick_test/` so backup and restore can be verified
+without copying the full workstation dataset.
+
 ---
 
 ## License
