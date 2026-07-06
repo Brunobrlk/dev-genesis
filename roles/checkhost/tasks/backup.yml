@@ -14,16 +14,15 @@
       Refusing to run backup. Configure backup_restore_root and confirm_backup=true.
 
 - name: Check backup destination root
-  ansible.builtin.stat:
-    path: "{{ backup_restore_root }}"
-  register: backup_destination_stat
+  ansible.builtin.file:
+    path: "{{ backup_destination_root }}"
+    state: directory
+    mode: "0755"
 
 - name: Validate backup destination root
-  ansible.builtin.assert:
-    that:
-      - backup_destination_stat.stat.exists
-      - backup_destination_stat.stat.isdir
-    fail_msg: "Backup destination root does not exist: {{ backup_restore_root }}"
+  ansible.builtin.stat:
+    path: "{{ backup_destination_root }}"
+  register: backup_destination_stat
 
 - name: Detect backup destination filesystem type
   ansible.builtin.command:
@@ -33,7 +32,7 @@
       - --output
       - FSTYPE
       - --target
-      - "{{ backup_restore_root }}"
+      - "{{ backup_destination_root }}"
   register: backup_destination_filesystem
   changed_when: false
 
@@ -47,7 +46,7 @@
       - backup_destination_filesystem_type not in unsupported_backup_filesystems
     fail_msg: >-
       Backup destination filesystem "{{ backup_destination_filesystem_type }}" is not supported.
-      Use a Linux-native filesystem such as ext4, btrfs, or xfs for {{ backup_restore_root }}.
+      Use a Linux-native filesystem such as ext4, btrfs, or xfs for {{ backup_destination_root }}.
 
 - name: Validate backup destination filesystem is Linux-compatible
   ansible.builtin.assert:

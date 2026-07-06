@@ -1,7 +1,7 @@
 ---
 vms_libvirt_uri: qemu:///system
 
-vms_backup_root: /run/media/brunobrlk/Backup/dev-genesis/vms
+vms_backup_root: "{{ external_drive_mount }}/Backups/vms/{{ backup_date }}"
 
 vms_disk_dir: /var/lib/libvirt/images
 vms_domain_backup_dir: "{{ vms_backup_root }}/domains"

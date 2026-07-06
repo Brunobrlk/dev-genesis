@@ -14,4 +14,20 @@ confirm_nvidia_setup: false
 
 dotfiles_repo_url: "https://github.com/Brunobrlk/dotfiles.git"
 
-backup_restore_root: "/run/media/{{ ansible_user_id }}/Bruno/Backups/current"
+external_drive_mount: "/run/media/{{ ansible_user_id }}/Bruno"
+backup_destination_root: "{{ external_drive_mount }}/Backups"
+backup_date: "{{ ansible_date_time.date }}"
+detected_machine_name: >-
+  {{
+    (
+      ansible_facts.product_name
+      | default(ansible_facts.hostname, true)
+    )
+    | lower
+    | regex_replace('[ _]+', '-')
+    | regex_replace('[^a-z0-9-]+', '-')
+    | regex_replace('-+', '-')
+    | regex_replace('^-+', '')
+    | regex_replace('-+$', '')
+  }}
+backup_restore_root: "{{ backup_destination_root }}/workstation/{{ detected_machine_name }}/{{ backup_date }}/home"
