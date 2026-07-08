@@ -2,25 +2,15 @@
 - name: Validate common workstation values
   ansible.builtin.import_tasks: common_workstation.yml
 
-- name: Validate restore configuration
+- name: Validate restore confirmation and core paths
   ansible.builtin.assert:
     that:
-      - backup_restore_root is defined
-      - backup_restore_root is string
-      - backup_restore_root | length > 0
       - confirm_restore is defined
       - confirm_restore | bool
+      - backup_destination_root is defined
+      - backup_destination_root is string
+      - backup_destination_root | length > 0
+      - backup_destination_root.startswith('/')
     fail_msg: >-
-      Refusing to run restore. Configure backup_restore_root and confirm_restore=true.
-
-- name: Check restore source root
-  ansible.builtin.stat:
-    path: "{{ backup_restore_root }}"
-  register: restore_source_stat
-
-- name: Validate restore source root
-  ansible.builtin.assert:
-    that:
-      - restore_source_stat.stat.exists
-      - restore_source_stat.stat.isdir
-    fail_msg: "Restore source root does not exist: {{ backup_restore_root }}"
+      Refusing to run restore. Set confirm_restore=true and configure
+      an absolute backup_destination_root.

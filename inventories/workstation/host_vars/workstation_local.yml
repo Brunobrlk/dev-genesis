@@ -17,6 +17,7 @@ dotfiles_repo_url: "https://github.com/Brunobrlk/dotfiles.git"
 external_drive_mount: "/run/media/{{ ansible_user_id }}/Bruno"
 backup_destination_root: "{{ external_drive_mount }}/Backups"
 backup_date: "{{ ansible_date_time.date }}"
+restore_backup_date: ""
 detected_machine_name: >-
   {{
     (

@@ -2,27 +2,27 @@
 items:
   - name: secure-local-share
     local: "{{ ansible_user_dir }}/.local/share/secure/"
-    backup: "{{ backup_restore_root }}/.local/share/secure/"
+    backup: "{{ backup_catalog_root }}/.local/share/secure/"
     mode: "0700"
 
   - name: ssh
     local: "{{ ansible_user_dir }}/.ssh/"
-    backup: "{{ backup_restore_root }}/.ssh/"
+    backup: "{{ backup_catalog_root }}/.ssh/"
     mode: "0700"
 
   - name: gnupg
     local: "{{ ansible_user_dir }}/.gnupg/"
-    backup: "{{ backup_restore_root }}/.gnupg/"
+    backup: "{{ backup_catalog_root }}/.gnupg/"
     mode: "0700"
 
   - name: utils
     local: "{{ ansible_user_dir }}/.utils/"
-    backup: "{{ backup_restore_root }}/.utils/"
+    backup: "{{ backup_catalog_root }}/.utils/"
     mode: "0700"
 
   - name: development
     local: "{{ ansible_user_dir }}/Development/"
-    backup: "{{ backup_restore_root }}/Development/"
+    backup: "{{ backup_catalog_root }}/Development/"
     backup_rsync_options:
       - --copy-links
       - --exclude=build/
@@ -38,16 +38,16 @@ items:
 
   - name: documents
     local: "{{ ansible_user_dir }}/Documents/"
-    backup: "{{ backup_restore_root }}/Documents/"
+    backup: "{{ backup_catalog_root }}/Documents/"
 
   - name: videos
     local: "{{ ansible_user_dir }}/Videos/"
-    backup: "{{ backup_restore_root }}/Videos/"
+    backup: "{{ backup_catalog_root }}/Videos/"
 
   - name: music
     local: "{{ ansible_user_dir }}/Music/"
-    backup: "{{ backup_restore_root }}/Music/"
+    backup: "{{ backup_catalog_root }}/Music/"
 
   - name: pictures
     local: "{{ ansible_user_dir }}/Pictures/"
-    backup: "{{ backup_restore_root }}/Pictures/"
+    backup: "{{ backup_catalog_root }}/Pictures/"

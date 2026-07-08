@@ -1,0 +1,103 @@
+---
+- name: Build enabled restore item list
+  ansible.builtin.set_fact:
+    restore_enabled_items: >-
+      {{
+        (items | default([]) | rejectattr('enabled', 'defined') | list)
+        +
+        (items | default([]) | selectattr('enabled', 'defined') | selectattr('enabled') | list)
+      }}
+
+- name: Validate restore variables
+  ansible.builtin.assert:
+    that:
+      - confirm_restore is defined
+      - confirm_restore | bool
+      - backup_destination_root is defined
+      - backup_destination_root is string
+      - backup_destination_root | length > 0
+      - backup_destination_root.startswith('/')
+      - restore_backup_date is defined
+      - restore_backup_date is string
+      - restore_backup_date | length > 0
+      - restore_backup_date is match('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+      - detected_machine_name is defined
+      - detected_machine_name is string
+      - detected_machine_name | length > 0
+      - restore_source_root is defined
+      - restore_source_root is string
+      - restore_source_root | length > 0
+      - restore_source_root.startswith('/')
+      - restore_source_root not in ['/', '/home', ansible_user_dir]
+    fail_msg: >-
+      Invalid restore configuration. Set confirm_restore=true, configure
+      backup_destination_root, detected_machine_name, and
+      restore_backup_date in YYYY-MM-DD format.
+
+- name: Show selected restore source path
+  ansible.builtin.debug:
+    msg: "Restoring workstation data from {{ restore_source_root }}"
+
+- name: Check restore source root
+  ansible.builtin.stat:
+    path: "{{ restore_source_root }}"
+  register: restore_source_root_stat
+
+- name: Validate restore source root
+  ansible.builtin.assert:
+    that:
+      - restore_source_root_stat.stat.exists
+      - restore_source_root_stat.stat.isdir
+    fail_msg: "Restore source root does not exist: {{ restore_source_root }}"
+
+- name: Ensure restore destination home exists
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Validate restore destination home
+  ansible.builtin.assert:
+    that:
+      - ansible_user_dir is defined
+      - ansible_user_dir is string
+      - ansible_user_dir | length > 0
+      - ansible_user_dir.startswith('/home/')
+      - ansible_user_dir not in ['/', '/home']
+    fail_msg: "Unsafe restore destination home refused: {{ ansible_user_dir }}"
+
+- name: Check restore sources
+  ansible.builtin.stat:
+    path: "{{ item.backup }}"
+  register: restore_source_stats
+  loop: "{{ restore_enabled_items | default([]) }}"
+  loop_control:
+    label: "{{ item.name | default(item.local | default('restore-item')) }}"
+
+- name: Validate restore sources exist
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+    fail_msg: "Restore source is missing for {{ item.item.name }}: {{ item.item.backup }}"
+  loop: "{{ restore_source_stats.results }}"
+  loop_control:
+    label: "{{ item.item.name | default(item.item.local | default('restore-item')) }}"
+
+- name: Validate restore destinations are safe
+  ansible.builtin.assert:
+    that:
+      - item.item.local is string
+      - item.item.local | length > 0
+      - item.item.local | regex_replace('/+$', '') not in ['/', '/home', ansible_user_dir | regex_replace('/+$', '')]
+      - (item.item.local | regex_replace('/+$', '')).startswith((ansible_user_dir | regex_replace('/+$', '')) ~ '/')
+    fail_msg: "Unsafe restore destination path refused for {{ item.item.name }}: {{ item.item.local }}"
+  loop: "{{ restore_source_stats.results }}"
+  loop_control:
+    label: "{{ item.item.name | default(item.item.local | default('restore-item')) }}"
+
+- name: Build restore item list to process
+  ansible.builtin.set_fact:
+    restore_items_to_process: "{{ (restore_items_to_process | default([])) + [item.item] }}"
+  loop: "{{ restore_source_stats.results }}"
+  loop_control:
+    label: "{{ item.item.name | default(item.item.local | default('restore-item')) }}"

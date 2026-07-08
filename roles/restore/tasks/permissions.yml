@@ -1,0 +1,185 @@
+---
+- name: Detect whether .ssh was restored in this run
+  ansible.builtin.set_fact:
+    restore_has_ssh: >-
+      {{
+        (restore_items_to_process | default([]))
+        | selectattr('local', 'equalto', ansible_user_dir ~ '/.ssh/')
+        | list
+        | length > 0
+      }}
+
+- name: Check restored .ssh directory
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/.ssh"
+  register: restore_ssh_stat
+  when: restore_has_ssh
+
+- name: Find restored .ssh subdirectories
+  ansible.builtin.find:
+    paths: "{{ ansible_user_dir }}/.ssh"
+    file_type: directory
+    recurse: true
+  register: restore_ssh_directories
+  when:
+    - restore_has_ssh
+    - restore_ssh_stat.stat.exists
+
+- name: Find restored .ssh files
+  ansible.builtin.find:
+    paths: "{{ ansible_user_dir }}/.ssh"
+    file_type: file
+    recurse: true
+  register: restore_ssh_files
+  when:
+    - restore_has_ssh
+    - restore_ssh_stat.stat.exists
+
+- name: Tighten restored .ssh directory permissions
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: "0700"
+  loop: "{{ restore_ssh_directories.files | default([]) + ([{'path': ansible_user_dir ~ '/.ssh'}] if restore_ssh_stat.stat.exists else []) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when:
+    - restore_has_ssh
+    - restore_ssh_stat.stat.exists
+
+- name: Tighten restored .ssh file permissions
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: >-
+      {{
+        '0644'
+        if (item.path | basename).endswith('.pub')
+        else '0600'
+      }}
+  loop: "{{ restore_ssh_files.files | default([]) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when:
+    - restore_has_ssh
+    - restore_ssh_stat.stat.exists
+
+- name: Detect whether .gnupg was restored in this run
+  ansible.builtin.set_fact:
+    restore_has_gnupg: >-
+      {{
+        (restore_items_to_process | default([]))
+        | selectattr('local', 'equalto', ansible_user_dir ~ '/.gnupg/')
+        | list
+        | length > 0
+      }}
+
+- name: Check restored .gnupg directory
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/.gnupg"
+  register: restore_gnupg_stat
+  when: restore_has_gnupg
+
+- name: Find restored .gnupg subdirectories
+  ansible.builtin.find:
+    paths: "{{ ansible_user_dir }}/.gnupg"
+    file_type: directory
+    recurse: true
+  register: restore_gnupg_directories
+  when:
+    - restore_has_gnupg
+    - restore_gnupg_stat.stat.exists
+
+- name: Find restored .gnupg files
+  ansible.builtin.find:
+    paths: "{{ ansible_user_dir }}/.gnupg"
+    file_type: file
+    recurse: true
+  register: restore_gnupg_files
+  when:
+    - restore_has_gnupg
+    - restore_gnupg_stat.stat.exists
+
+- name: Tighten restored .gnupg directory permissions
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: "0700"
+  loop: "{{ restore_gnupg_directories.files | default([]) + ([{'path': ansible_user_dir ~ '/.gnupg'}] if restore_gnupg_stat.stat.exists else []) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when:
+    - restore_has_gnupg
+    - restore_gnupg_stat.stat.exists
+
+- name: Tighten restored .gnupg file permissions
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: "0600"
+  loop: "{{ restore_gnupg_files.files | default([]) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when:
+    - restore_has_gnupg
+    - restore_gnupg_stat.stat.exists
+
+- name: Detect whether secure local share was restored in this run
+  ansible.builtin.set_fact:
+    restore_has_secure_share: >-
+      {{
+        (restore_items_to_process | default([]))
+        | selectattr('local', 'equalto', ansible_user_dir ~ '/.local/share/secure/')
+        | list
+        | length > 0
+      }}
+
+- name: Check restored secure local share directory
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/.local/share/secure"
+  register: restore_secure_share_stat
+  when: restore_has_secure_share
+
+- name: Find restored secure local share subdirectories
+  ansible.builtin.find:
+    paths: "{{ ansible_user_dir }}/.local/share/secure"
+    file_type: directory
+    recurse: true
+  register: restore_secure_share_directories
+  when:
+    - restore_has_secure_share
+    - restore_secure_share_stat.stat.exists
+
+- name: Find restored secure local share files
+  ansible.builtin.find:
+    paths: "{{ ansible_user_dir }}/.local/share/secure"
+    file_type: file
+    recurse: true
+  register: restore_secure_share_files
+  when:
+    - restore_has_secure_share
+    - restore_secure_share_stat.stat.exists
+
+- name: Tighten restored secure local share directory permissions
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: "0700"
+  loop: "{{ restore_secure_share_directories.files | default([]) + ([{'path': ansible_user_dir ~ '/.local/share/secure'}] if restore_secure_share_stat.stat.exists else []) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when:
+    - restore_has_secure_share
+    - restore_secure_share_stat.stat.exists
+
+- name: Tighten restored secure local share file permissions
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: "0600"
+  loop: "{{ restore_secure_share_files.files | default([]) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when:
+    - restore_has_secure_share
+    - restore_secure_share_stat.stat.exists

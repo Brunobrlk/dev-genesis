@@ -1,0 +1,47 @@
+---
+- name: Resolve restore target primary group
+  ansible.builtin.command:
+    argv:
+      - id
+      - -gn
+      - "{{ ansible_user_id }}"
+  register: restore_target_group_command
+  changed_when: false
+
+- name: Set restore ownership facts
+  ansible.builtin.set_fact:
+    restore_target_owner: "{{ ansible_user_id }}"
+    restore_target_group: "{{ restore_target_group_command.stdout | trim }}"
+
+- name: Check restored destination paths before ownership reset
+  ansible.builtin.stat:
+    path: "{{ item.local }}"
+  register: restore_destination_stats
+  loop: "{{ restore_items_to_process | default([]) }}"
+  loop_control:
+    label: "{{ item.name | default(item.local | default('restore-item')) }}"
+
+- name: Validate restored destination paths are safe for ownership reset
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+      - item.item.local is string
+      - item.item.local | length > 0
+      - item.item.local | regex_replace('/+$', '') not in ['/', '/home', ansible_user_dir | regex_replace('/+$', '')]
+      - (item.item.local | regex_replace('/+$', '')).startswith((ansible_user_dir | regex_replace('/+$', '')) ~ '/')
+    fail_msg: "Unsafe ownership reset path refused for {{ item.item.name }}: {{ item.item.local }}"
+  loop: "{{ restore_destination_stats.results }}"
+  loop_control:
+    label: "{{ item.item.name | default(item.item.local | default('restore-item')) }}"
+
+- name: Reset ownership on restored paths
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.item.local }}"
+    state: directory
+    owner: "{{ restore_target_owner }}"
+    group: "{{ restore_target_group }}"
+    recurse: true
+  loop: "{{ restore_destination_stats.results }}"
+  loop_control:
+    label: "{{ item.item.name | default(item.item.local | default('restore-item')) }}"

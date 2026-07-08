@@ -1,5 +1,9 @@
 ---
 backup_restore_catalog_file: "{{ playbook_dir }}/../vars/backup_restore/workstation.yml"
+restore_backup_date: ""
+# TODO: allow blank restore_backup_date to fall back to the latest backup later.
+restore_source_root: "{{ backup_destination_root }}/workstation/{{ detected_machine_name }}/{{ restore_backup_date }}/home"
+backup_catalog_root: "{{ restore_source_root }}"
 
 restore_confirm: "{{ confirm_restore | default(false) }}"
 

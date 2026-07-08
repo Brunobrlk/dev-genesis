@@ -10,10 +10,18 @@
   ansible.builtin.include_vars:
     file: "{{ backup_restore_catalog_file }}"
 
+- name: Validate restore configuration
+  ansible.builtin.import_tasks: validation.yml
+
 - name: Restore items
   ansible.builtin.include_tasks: item.yml
-  loop: "{{ items | default([]) }}"
+  loop: "{{ restore_items_to_process | default([]) }}"
   loop_control:
     loop_var: item
     label: "{{ item.name | default(item.local | default('restore-item')) }}"
-  when: item.enabled | default(true) | bool
+
+- name: Reset ownership on restored items
+  ansible.builtin.import_tasks: ownership.yml
+
+- name: Tighten permissions on restored sensitive paths
+  ansible.builtin.import_tasks: permissions.yml

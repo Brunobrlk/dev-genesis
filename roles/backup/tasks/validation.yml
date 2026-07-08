@@ -1,0 +1,203 @@
+---
+- name: Build enabled backup item list
+  ansible.builtin.set_fact:
+    backup_enabled_items: >-
+      {{
+        (items | default([]) | rejectattr('enabled', 'defined') | list)
+        +
+        (items | default([]) | selectattr('enabled', 'defined') | selectattr('enabled') | list)
+      }}
+
+- name: Validate backup variables
+  ansible.builtin.assert:
+    that:
+      - confirm_backup is defined
+      - confirm_backup | bool
+      - external_drive_mount is defined
+      - external_drive_mount is string
+      - external_drive_mount | length > 0
+      - external_drive_mount.startswith('/')
+      - backup_destination_root is defined
+      - backup_destination_root is string
+      - backup_destination_root | length > 0
+      - backup_destination_root.startswith('/')
+      - backup_date is defined
+      - backup_date is string
+      - backup_date | length > 0
+      - backup_date is match('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+      - detected_machine_name is defined
+      - detected_machine_name is string
+      - detected_machine_name | length > 0
+      - backup_restore_root is defined
+      - backup_restore_root is string
+      - backup_restore_root | length > 0
+      - backup_restore_root.startswith('/')
+      - backup_restore_root not in ['/', ansible_user_dir]
+    fail_msg: >-
+      Invalid backup configuration. Set confirm_backup=true, configure
+      external_drive_mount, backup_destination_root, backup_restore_root,
+      backup_date (YYYY-MM-DD), and detected_machine_name.
+
+- name: Check external drive mount path
+  ansible.builtin.stat:
+    path: "{{ external_drive_mount }}"
+  register: backup_external_drive_mount_stat
+
+- name: Validate external drive mount path
+  ansible.builtin.assert:
+    that:
+      - backup_external_drive_mount_stat.stat.exists
+      - backup_external_drive_mount_stat.stat.isdir
+    fail_msg: "External drive mount is not available: {{ external_drive_mount }}"
+
+- name: Check current user home directory
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}"
+  register: backup_user_home_stat
+
+- name: Validate current user home directory
+  ansible.builtin.assert:
+    that:
+      - backup_user_home_stat.stat.exists
+      - backup_user_home_stat.stat.isdir
+    fail_msg: "Current user home directory does not exist: {{ ansible_user_dir }}"
+
+- name: Ensure backup destination root exists
+  ansible.builtin.file:
+    path: "{{ backup_destination_root }}"
+    state: directory
+    mode: "0755"
+
+- name: Validate backup destination root
+  ansible.builtin.stat:
+    path: "{{ backup_destination_root }}"
+  register: backup_destination_root_stat
+
+- name: Validate backup destination root directory
+  ansible.builtin.assert:
+    that:
+      - backup_destination_root_stat.stat.exists
+      - backup_destination_root_stat.stat.isdir
+    fail_msg: "Backup destination root is not a directory: {{ backup_destination_root }}"
+
+- name: Detect backup destination filesystem type
+  ansible.builtin.command:
+    argv:
+      - findmnt
+      - --noheadings
+      - --output
+      - FSTYPE
+      - --target
+      - "{{ backup_destination_root }}"
+  register: backup_destination_filesystem
+  changed_when: false
+
+- name: Normalize backup destination filesystem type
+  ansible.builtin.set_fact:
+    backup_destination_filesystem_type: "{{ backup_destination_filesystem.stdout | trim | lower }}"
+
+- name: Fail when backup destination filesystem is explicitly unsupported
+  ansible.builtin.assert:
+    that:
+      - backup_destination_filesystem_type not in unsupported_backup_filesystems
+      - backup_destination_filesystem_type in backup_linux_filesystems
+    fail_msg: >-
+      Backup destination filesystem "{{ backup_destination_filesystem_type }}" is not allowed.
+      Supported filesystems: {{ backup_linux_filesystems | join(', ') }}.
+
+- name: Validate backup destination safety
+  ansible.builtin.assert:
+    that:
+      - backup_restore_root | regex_replace('/+$', '') not in ['/', '/home', ansible_user_dir | regex_replace('/+$', '')]
+    fail_msg: "Unsafe backup destination path refused: {{ backup_restore_root }}"
+
+- name: Check backup sources
+  ansible.builtin.stat:
+    path: "{{ item.local }}"
+  register: backup_source_stats
+  loop: "{{ backup_enabled_items | default([]) }}"
+  loop_control:
+    label: "{{ item.name | default(item.local | default('backup-item')) }}"
+
+- name: Refuse self-recursive backup destinations
+  ansible.builtin.assert:
+    that:
+      - item.item.local | regex_replace('/+$', '') != backup_restore_root | regex_replace('/+$', '')
+      - not (backup_restore_root | regex_replace('/+$', '')).startswith((item.item.local | regex_replace('/+$', '')) ~ '/')
+    fail_msg: >-
+      Backup destination {{ backup_restore_root }} is inside source {{ item.item.local }}.
+      Refusing self-recursive backup.
+  loop: "{{ backup_source_stats.results }}"
+  loop_control:
+    label: "{{ item.item.name | default(item.item.local | default('backup-item')) }}"
+
+- name: Validate required backup sources
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+    fail_msg: "Backup source is missing for {{ item.item.name }}: {{ item.item.local }}"
+  loop: "{{ backup_source_stats.results }}"
+  loop_control:
+    label: "{{ item.item.name | default(item.item.local | default('backup-item')) }}"
+  when: not (item.item.optional | default(false) | bool)
+
+- name: Report skipped optional backup sources
+  ansible.builtin.debug:
+    msg: "Skipping optional backup source for {{ item.item.name }} because it does not exist: {{ item.item.local }}"
+  loop: "{{ backup_source_stats.results }}"
+  loop_control:
+    label: "{{ item.item.name | default(item.item.local | default('backup-item')) }}"
+  when:
+    - item.item.optional | default(false) | bool
+    - not item.stat.exists
+
+- name: Build backup item list to process
+  ansible.builtin.set_fact:
+    backup_items_to_process: "{{ (backup_items_to_process | default([])) + [item.item] }}"
+  loop: "{{ backup_source_stats.results }}"
+  loop_control:
+    label: "{{ item.item.name | default(item.item.local | default('backup-item')) }}"
+  when: item.stat.exists
+
+- name: Measure backup source sizes
+  ansible.builtin.command:
+    argv:
+      - du
+      - -sb
+      - "{{ item.local }}"
+  register: backup_source_sizes
+  changed_when: false
+  loop: "{{ backup_items_to_process | default([]) }}"
+  loop_control:
+    label: "{{ item.name | default(item.local | default('backup-item')) }}"
+
+- name: Read available backup destination space
+  ansible.builtin.command:
+    argv:
+      - df
+      - --output=avail
+      - -B1
+      - "{{ backup_destination_root }}"
+  register: backup_available_space
+  changed_when: false
+
+- name: Calculate required and available backup space
+  ansible.builtin.set_fact:
+    backup_required_bytes: >-
+      {{
+        backup_source_sizes.results
+        | map(attribute='stdout')
+        | map('regex_search', '^[0-9]+')
+        | map('int')
+        | sum
+      }}
+    backup_available_bytes: "{{ backup_available_space.stdout_lines[-1] | trim | int }}"
+
+- name: Validate available backup destination space
+  ansible.builtin.assert:
+    that:
+      - backup_available_bytes >= backup_required_bytes
+    fail_msg: >-
+      Not enough free space on {{ backup_destination_root }}.
+      Required: {{ backup_required_bytes }} bytes.
+      Available: {{ backup_available_bytes }} bytes.

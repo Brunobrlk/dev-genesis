@@ -1,5 +1,6 @@
 ---
 backup_restore_catalog_file: "{{ playbook_dir }}/../vars/backup_restore/workstation.yml"
+backup_catalog_root: "{{ backup_restore_root }}"
 
 backup_dependencies:
   - name: backup-dependencies

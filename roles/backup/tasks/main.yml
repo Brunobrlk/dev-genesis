@@ -10,10 +10,12 @@
   ansible.builtin.include_vars:
     file: "{{ backup_restore_catalog_file }}"
 
+- name: Validate backup configuration
+  ansible.builtin.import_tasks: validation.yml
+
 - name: Backup items
   ansible.builtin.include_tasks: item.yml
-  loop: "{{ items | default([]) }}"
+  loop: "{{ backup_items_to_process | default([]) }}"
   loop_control:
     loop_var: item
     label: "{{ item.name | default(item.local | default('backup-item')) }}"
-  when: item.enabled | default(true) | bool
