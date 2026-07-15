@@ -1,0 +1,37 @@
+Backup manifest
+===============
+
+Backup root: {{ backup_session_root }}
+Backup type: workstation
+Backup status: {{ backup_status }}
+
+File count: {{ backup_manifest_file_count }}
+Total size: {{ backup_manifest_total_size_human }}
+Failed paths: {% if backup_failed_paths | length > 0 %}{{ backup_failed_paths | join(', ') }}{% else %}none{% endif %}
+
+Machine
+-------
+Machine name: {{ detected_machine_name }}
+Detected hostname: {{ ansible_hostname }}
+Distro: {{ ansible_distribution }}
+Kernel: {{ ansible_kernel }}
+
+User
+----
+Username: {{ ansible_user_id }}
+UID: {{ ansible_user_uid }}
+GID: {{ ansible_user_gid }}
+Home: {{ ansible_user_dir }}
+
+Included paths
+--------------
+{% for path in backup_manifest_included_paths %}
+- {{ path }}
+{% endfor %}
+
+Restore notes
+-------------
+- Restore files into the current user's home directory.
+- Do not assume the restored username is the same as the original username.
+- After restore, reset ownership to the current user.
+- After restore, fix strict permissions for .ssh, .gnupg, and secure folders.

@@ -15,11 +15,6 @@ items:
     backup: "{{ backup_catalog_root }}/.gnupg/"
     mode: "0700"
 
-  - name: utils
-    local: "{{ ansible_user_dir }}/.utils/"
-    backup: "{{ backup_catalog_root }}/.utils/"
-    mode: "0700"
-
   - name: development
     local: "{{ ansible_user_dir }}/Development/"
     backup: "{{ backup_catalog_root }}/Development/"

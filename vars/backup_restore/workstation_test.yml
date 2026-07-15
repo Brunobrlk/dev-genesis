@@ -28,17 +28,6 @@ items:
       - --include=/trustdb.gpg
       - --exclude=*
 
-  - name: utils-test
-    local: "{{ ansible_user_dir }}/.utils/"
-    backup: "{{ backup_catalog_root }}/.utils/"
-    mode: "0700"
-    rsync_options:
-      - --include=/Cheatsheets/
-      - --include=/Cheatsheets/INFO.md
-      - --include=/CodeGists/
-      - --include=/CodeGists/bash.sh
-      - --exclude=*
-
   - name: development-test
     local: "{{ ansible_user_dir }}/Development/"
     backup: "{{ backup_catalog_root }}/Development/"

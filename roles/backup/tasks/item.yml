@@ -8,4 +8,20 @@
 - name: Backup {{ item.name }}
   ansible.builtin.command:
     argv: "{{ ['rsync', '-a', '--human-readable'] + (item.backup_rsync_options | default(item.rsync_options | default([]))) + [item.local, item.backup] }}"
-  changed_when: true
+  register: backup_item_rsync_result
+  failed_when: false
+  changed_when: backup_item_rsync_result.rc == 0
+
+- name: Record backup result for {{ item.name }}
+  ansible.builtin.set_fact:
+    backup_item_results: >-
+      {{
+        backup_item_results + [
+          {
+            'name': item.name,
+            'local': item.local,
+            'backup': item.backup,
+            'rc': backup_item_rsync_result.rc
+          }
+        ]
+      }}

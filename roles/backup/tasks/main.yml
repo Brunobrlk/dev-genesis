@@ -13,9 +13,89 @@
 - name: Validate backup configuration
   ansible.builtin.import_tasks: validation.yml
 
+- name: Initialize backup manifest state
+  ansible.builtin.set_fact:
+    backup_item_results: []
+
+- name: Ensure backup session directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ backup_session_root }}"
+    - "{{ backup_restore_root }}"
+
 - name: Backup items
   ansible.builtin.include_tasks: item.yml
   loop: "{{ backup_items_to_process | default([]) }}"
   loop_control:
     loop_var: item
     label: "{{ item.name | default(item.local | default('backup-item')) }}"
+
+- name: Build failed backup path list
+  ansible.builtin.set_fact:
+    backup_failed_paths: >-
+      {{
+        backup_item_results
+        | rejectattr('rc', 'equalto', 0)
+        | map(attribute='local')
+        | list
+      }}
+
+- name: Set backup manifest status
+  ansible.builtin.set_fact:
+    backup_status: "{{ 'failed' if (backup_failed_paths | length > 0) else 'success' }}"
+
+- name: Count files in backup
+  ansible.builtin.shell: |
+    set -o pipefail
+    find {{ backup_restore_root | quote }} -type f -printf '.' | wc -c
+  args:
+    executable: /bin/bash
+  register: backup_file_count
+  changed_when: false
+
+- name: Measure total backup size in bytes
+  ansible.builtin.command:
+    argv:
+      - du
+      - -sb
+      - "{{ backup_restore_root }}"
+  register: backup_total_size_bytes
+  changed_when: false
+
+- name: Format backup manifest values
+  ansible.builtin.set_fact:
+    backup_manifest_file_count: "{{ backup_file_count.stdout | trim | int }}"
+    backup_manifest_total_size_bytes: "{{ backup_total_size_bytes.stdout | regex_search('^[0-9]+') | int }}"
+    backup_manifest_included_paths: >-
+      {{
+        backup_items_to_process
+        | map(attribute='local')
+        | map('regex_replace', '/+$', '')
+        | map('regex_replace', '^' ~ (ansible_user_dir | regex_escape) ~ '(?=/|$)', '~')
+        | list
+      }}
+
+- name: Format backup total size for manifest
+  ansible.builtin.set_fact:
+    backup_manifest_total_size_human: >-
+      {{
+        backup_manifest_total_size_bytes | int
+        | human_readable
+        | regex_replace('^([0-9.]+)([A-Za-z]+)$', '\\1 \\2')
+      }}
+
+- name: Write backup manifest
+  ansible.builtin.template:
+    src: manifest.txt.j2
+    dest: "{{ backup_session_root }}/manifest.txt"
+    mode: "0644"
+
+- name: Fail when any backup item did not complete successfully
+  ansible.builtin.assert:
+    that:
+      - backup_failed_paths | length == 0
+    fail_msg: >-
+      Backup completed with failures for: {{ backup_failed_paths | join(', ') }}

@@ -322,11 +322,11 @@ Quick backup/restore test:
 ```bash
 ansible-playbook -i inventories/workstation/hosts.yml playbooks/backup.yml \
   -e confirm_backup=true \
-  -e backup_restore_catalog_file=vars/backup_restore/workstation_test.yml
+  -e 'backup_restore_catalog_file={{ playbook_dir }}/../vars/backup_restore/workstation_test.yml'
 
 ansible-playbook -i inventories/workstation/hosts.yml playbooks/restore.yml \
   -e confirm_restore=true \
-  -e backup_restore_catalog_file=vars/backup_restore/workstation_test.yml
+  -e 'backup_restore_catalog_file={{ playbook_dir }}/../vars/backup_restore/workstation_test.yml'
 ```
 
 The quick test catalog copies only a small sample set into

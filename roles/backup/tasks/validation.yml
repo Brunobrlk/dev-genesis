@@ -201,3 +201,7 @@
       Not enough free space on {{ backup_destination_root }}.
       Required: {{ backup_required_bytes }} bytes.
       Available: {{ backup_available_bytes }} bytes.
+
+- name: Define backup session root
+  ansible.builtin.set_fact:
+    backup_session_root: "{{ backup_destination_root }}/workstation/{{ detected_machine_name }}/{{ backup_date }}"
