@@ -7,8 +7,13 @@
   vars_files:
     - ../vars/vms/main.yml
 
-  roles:
-    - role: checkhost
-      tasks_from: vms
+  pre_tasks:
+    - name: Validate VM backup target
+      ansible.builtin.import_role:
+        name: checkhost
+      vars:
+        checkhost_target: vms
+      tags: [ always, checkhost ]
 
+  roles:
     - role: vms_backup
