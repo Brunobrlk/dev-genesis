@@ -1,0 +1,64 @@
+---
+- name: Blacklist nouveau kernel module
+  become: true
+  ansible.builtin.copy:
+    dest: "{{ nvidia_nouveau_modprobe_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      blacklist nouveau
+      options nouveau modeset=0
+  register: nvidia_nouveau_modprobe_config
+
+- name: Ensure dracut disables nouveau on Fedora
+  become: true
+  ansible.builtin.copy:
+    dest: "{{ nvidia_dracut_config_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      omit_drivers+=" nouveau "
+  register: nvidia_nouveau_fedora_dracut_config
+  when: target_distro == 'fedora'
+
+- name: Rebuild initramfs on Fedora after nouveau changes
+  become: true
+  ansible.builtin.command:
+    argv:
+      - dracut
+      - --force
+  register: nvidia_fedora_initramfs_rebuild
+  when:
+    - target_distro == 'fedora'
+    - nvidia_nouveau_modprobe_config.changed
+      or ((nvidia_nouveau_fedora_dracut_config is defined)
+      and nvidia_nouveau_fedora_dracut_config.changed)
+
+- name: Rebuild initramfs on Debian after nouveau changes
+  become: true
+  ansible.builtin.command:
+    argv:
+      - update-initramfs
+      - -u
+  register: nvidia_debian_initramfs_rebuild
+  when:
+    - target_distro == 'debian'
+    - nvidia_nouveau_modprobe_config.changed
+
+- name: Record nouveau and initramfs workflow state
+  ansible.builtin.set_fact:
+    nvidia_nouveau_config_changed: >-
+      {{
+        nvidia_nouveau_modprobe_config.changed
+        or (
+          (nvidia_nouveau_fedora_dracut_config is defined)
+          and nvidia_nouveau_fedora_dracut_config.changed
+        )
+      }}
+    nvidia_initramfs_rebuilt: >-
+      {{
+        ((nvidia_fedora_initramfs_rebuild is defined) and (nvidia_fedora_initramfs_rebuild is not skipped))
+        or ((nvidia_debian_initramfs_rebuild is defined) and (nvidia_debian_initramfs_rebuild is not skipped))
+      }}

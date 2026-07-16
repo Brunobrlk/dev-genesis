@@ -46,7 +46,7 @@ The project is designed to grow across distros and machine profiles without beco
 | KVM/libvirt host   |          Active | QEMU, libvirt services, permissions, tuned profile       |
 | Backup/restore     |          Active | Workstation data backup/restore with confirmation flags  |
 | VM backup/restore  |          Active | Local Linux libvirt VM disk/XML backup and restore       |
-| NVIDIA             | Planned/skipped | Separate playbook, not part of the current test path     |
+| NVIDIA             |         Partial | Separate two-run playbook workflow, not runtime-tested   |
 | VM guest config    | Planned/skipped | Separate playbook, not part of the current test path     |
 
 ---
@@ -193,6 +193,7 @@ Some tools get their own role because they need validation, configuration, gener
 | `virtualization_host`        | QEMU/libvirt packages, services, groups, ACLs, tuned profile  |
 | `backup` / `restore`         | Explicit data movement with safety confirmation               |
 | `vms_backup` / `vms_restore` | VM disk/XML backup and restore workflow                       |
+| `nvidia`                     | Isolated two-run NVIDIA install and post-reboot verification  |
 
 ---
 
@@ -332,6 +333,24 @@ ansible-playbook -i inventories/workstation/hosts.yml playbooks/restore.yml \
 The quick test catalog copies only a small sample set into
 `{{ backup_restore_root }}/_quick_test/` so backup and restore can be verified
 without copying the full workstation dataset.
+
+NVIDIA workflow:
+
+```bash
+ansible-playbook -i inventories/workstation/hosts.yml \
+  playbooks/setup_nvidia.yml \
+  -e confirm_nvidia_setup=true
+
+sudo reboot
+
+ansible-playbook -i inventories/workstation/hosts.yml \
+  playbooks/setup_nvidia.yml \
+  -e confirm_nvidia_setup=true
+```
+
+The second invocation does not resume from a saved installer phase. It reruns
+the same isolated playbook idempotently and performs post-reboot verification
+when no additional reboot-requiring changes were made.
 
 ---
 

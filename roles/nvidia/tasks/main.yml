@@ -1,0 +1,67 @@
+---
+- name: Assert NVIDIA role supports Linux workstation targets
+  ansible.builtin.assert:
+    that:
+      - ansible_system == "Linux"
+      - target_distro is defined
+      - target_distro in nvidia_supported_distros
+    fail_msg: >-
+      The NVIDIA role supports Linux workstation targets using
+      {{ nvidia_supported_distros | join(', ') }}.
+
+- name: Load NVIDIA vars for target distro
+  ansible.builtin.include_vars:
+    file: "{{ playbook_dir }}/../vars/nvidia/{{ target_distro }}.yml"
+
+- name: Validate NVIDIA configuration
+  ansible.builtin.import_tasks: validation.yml
+
+- name: Run NVIDIA preflight checks
+  ansible.builtin.import_tasks: preflight.yml
+
+- name: Initialize NVIDIA workflow state
+  ansible.builtin.set_fact:
+    nvidia_driver_packages_changed: false
+    nvidia_kernel_module_built: false
+    nvidia_nouveau_config_changed: false
+    nvidia_initramfs_rebuilt: false
+
+- name: Install NVIDIA driver for target distro
+  ansible.builtin.include_tasks: "{{ target_distro }}.yml"
+
+- name: Configure nouveau handling
+  ansible.builtin.import_tasks: nouveau.yml
+
+- name: Calculate whether NVIDIA workflow requires reboot
+  ansible.builtin.set_fact:
+    nvidia_reboot_required: >-
+      {{
+        (nvidia_driver_packages_changed | bool)
+        or (nvidia_kernel_module_built | bool)
+        or (nvidia_nouveau_config_changed | bool)
+        or (nvidia_initramfs_rebuilt | bool)
+      }}
+
+- name: Report NVIDIA manual reboot boundary
+  ansible.builtin.debug:
+    msg: |
+      NVIDIA packages and configuration are ready, and the kernel module for
+      {{ ansible_kernel }} was generated successfully.
+
+      A reboot is now required before runtime verification.
+
+      Run:
+      sudo reboot
+
+      After reboot, run:
+      ansible-playbook -i inventories/workstation/hosts.yml \
+        playbooks/setup_nvidia.yml \
+        -e confirm_nvidia_setup=true
+  when: nvidia_reboot_required | bool
+
+- name: End NVIDIA play after install phase
+  ansible.builtin.meta: end_play
+  when: nvidia_reboot_required | bool
+
+- name: Verify NVIDIA runtime after reboot
+  ansible.builtin.import_tasks: verify.yml

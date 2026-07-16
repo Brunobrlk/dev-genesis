@@ -1,0 +1,67 @@
+---
+- name: Install RPM Fusion release repositories for NVIDIA on Fedora
+  become: true
+  ansible.builtin.dnf:
+    name:
+      - "{{ nvidia_fedora_rpmfusion_free_release_rpm }}"
+      - "{{ nvidia_fedora_rpmfusion_nonfree_release_rpm }}"
+    state: present
+    disable_gpg_check: false
+
+- name: Install NVIDIA driver packages on Fedora
+  become: true
+  ansible.builtin.dnf:
+    name: "{{ nvidia_fedora_packages }}"
+    state: present
+    update_cache: true
+  register: nvidia_fedora_package_install
+
+- name: Check whether NVIDIA module exists for the current Fedora kernel
+  become: true
+  ansible.builtin.command:
+    argv:
+      - modinfo
+      - -k
+      - "{{ ansible_kernel }}"
+      - nvidia
+  register: nvidia_fedora_modinfo_before
+  changed_when: false
+  failed_when: false
+
+- name: Build NVIDIA kernel module for the current Fedora kernel
+  become: true
+  ansible.builtin.command:
+    argv:
+      - akmods
+      - --force
+      - --kernels
+      - "{{ ansible_kernel }}"
+  register: nvidia_fedora_akmods_build
+  when:
+    - nvidia_fedora_package_install.changed
+      or nvidia_fedora_modinfo_before.rc != 0
+
+- name: Check whether NVIDIA module exists after Fedora build
+  become: true
+  ansible.builtin.command:
+    argv:
+      - modinfo
+      - -k
+      - "{{ ansible_kernel }}"
+      - nvidia
+  register: nvidia_fedora_modinfo_after
+  changed_when: false
+  failed_when: false
+
+- name: Validate NVIDIA module was generated for the current Fedora kernel
+  ansible.builtin.assert:
+    that:
+      - nvidia_fedora_modinfo_after.rc == 0
+    fail_msg: >-
+      NVIDIA kernel module was not generated successfully for kernel
+      {{ ansible_kernel }} on Fedora.
+
+- name: Record Fedora NVIDIA workflow state
+  ansible.builtin.set_fact:
+    nvidia_driver_packages_changed: "{{ nvidia_fedora_package_install.changed }}"
+    nvidia_kernel_module_built: "{{ (nvidia_fedora_akmods_build is defined) and (nvidia_fedora_akmods_build is not skipped) }}"

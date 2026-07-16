@@ -1,0 +1,89 @@
+---
+- name: Ensure Debian non-free components are enabled for NVIDIA
+  become: true
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb http://deb.debian.org/debian
+      {{ ansible_distribution_release }}
+      main {{ nvidia_debian_apt_components | join(' ') }}
+    filename: debian-nonfree
+    state: present
+    update_cache: true
+
+- name: Ensure Debian security non-free components are enabled for NVIDIA
+  become: true
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb http://security.debian.org/debian-security
+      {{ ansible_distribution_release }}-security
+      main {{ nvidia_debian_apt_components | join(' ') }}
+    filename: debian-security-nonfree
+    state: present
+    update_cache: true
+
+- name: Ensure Debian updates non-free components are enabled for NVIDIA
+  become: true
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb http://deb.debian.org/debian
+      {{ ansible_distribution_release }}-updates
+      main {{ nvidia_debian_apt_components | join(' ') }}
+    filename: debian-updates-nonfree
+    state: present
+    update_cache: true
+
+- name: Install NVIDIA driver packages on Debian
+  become: true
+  ansible.builtin.apt:
+    name: "{{ nvidia_debian_packages }}"
+    state: present
+    update_cache: true
+  register: nvidia_debian_package_install
+
+- name: Check whether NVIDIA module exists for the current Debian kernel
+  become: true
+  ansible.builtin.command:
+    argv:
+      - modinfo
+      - -k
+      - "{{ ansible_kernel }}"
+      - nvidia
+  register: nvidia_debian_modinfo_before
+  changed_when: false
+  failed_when: false
+
+- name: Build initramfs-driven NVIDIA module availability on Debian
+  become: true
+  ansible.builtin.command:
+    argv:
+      - update-initramfs
+      - -u
+  register: nvidia_debian_module_build
+  when:
+    - nvidia_debian_package_install.changed
+      or nvidia_debian_modinfo_before.rc != 0
+
+- name: Check whether NVIDIA module exists after Debian build
+  become: true
+  ansible.builtin.command:
+    argv:
+      - modinfo
+      - -k
+      - "{{ ansible_kernel }}"
+      - nvidia
+  register: nvidia_debian_modinfo_after
+  changed_when: false
+  failed_when: false
+
+- name: Validate NVIDIA module was generated for the current Debian kernel
+  ansible.builtin.assert:
+    that:
+      - nvidia_debian_modinfo_after.rc == 0
+    fail_msg: >-
+      NVIDIA kernel module was not generated successfully for kernel
+      {{ ansible_kernel }} on Debian.
+
+- name: Record Debian NVIDIA workflow state
+  ansible.builtin.set_fact:
+    nvidia_driver_packages_changed: "{{ nvidia_debian_package_install.changed }}"
+    nvidia_kernel_module_built: "{{ (nvidia_debian_module_build is defined) and (nvidia_debian_module_build is not skipped) }}"

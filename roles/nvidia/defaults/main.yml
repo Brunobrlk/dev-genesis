@@ -1,0 +1,27 @@
+---
+nvidia_supported_distros:
+  - fedora
+  - debian
+
+nvidia_require_secure_boot_disabled: true
+nvidia_secure_boot_packages:
+  - mokutil
+
+nvidia_nouveau_modprobe_path: /etc/modprobe.d/blacklist-nouveau.conf
+nvidia_dracut_config_path: /etc/dracut.conf.d/99-nvidia.conf
+
+nvidia_fedora_rpmfusion_free_release_rpm: "https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ ansible_distribution_major_version }}.noarch.rpm"
+nvidia_fedora_rpmfusion_nonfree_release_rpm: "https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ ansible_distribution_major_version }}.noarch.rpm"
+nvidia_fedora_packages:
+  - akmod-nvidia
+  - xorg-x11-drv-nvidia
+  - xorg-x11-drv-nvidia-cuda
+
+nvidia_debian_packages:
+  - nvidia-driver
+  - firmware-misc-nonfree
+
+nvidia_debian_apt_components:
+  - contrib
+  - non-free
+  - non-free-firmware

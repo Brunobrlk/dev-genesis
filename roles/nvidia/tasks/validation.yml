@@ -1,0 +1,13 @@
+---
+- name: Validate NVIDIA vars
+  ansible.builtin.assert:
+    that:
+      - nvidia_distro_family is defined
+      - nvidia_distro_family == target_distro
+      - nvidia_driver_source is defined
+      - nvidia_driver_source | length > 0
+      - nvidia_require_secure_boot_disabled is defined
+      - nvidia_require_secure_boot_disabled | type_debug == 'bool'
+    fail_msg: >-
+      Invalid NVIDIA vars for {{ target_distro }}. Expected matching distro vars
+      under vars/nvidia/{{ target_distro }}.yml and a valid Secure Boot policy.

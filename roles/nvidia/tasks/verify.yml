@@ -1,0 +1,48 @@
+---
+- name: Read loaded kernel modules
+  ansible.builtin.slurp:
+    src: /proc/modules
+  register: nvidia_loaded_modules
+
+- name: Assert NVIDIA kernel module is loaded
+  ansible.builtin.assert:
+    that:
+      - (nvidia_loaded_modules.content | b64decode) is search('(?m)^nvidia\\s')
+    fail_msg: |
+      NVIDIA kernel module is not loaded. One likely cause is that the required
+      reboot has not happened yet after installation or module build.
+
+      Useful diagnostics:
+      mokutil --sb-state
+      modinfo -k "$(uname -r)" nvidia
+      nvidia-smi
+      journalctl -b -k | grep -iE 'nvidia|nouveau|secure boot'
+      ls -la /var/cache/akmods/
+
+- name: Run nvidia-smi for post-reboot verification
+  ansible.builtin.command:
+    argv:
+      - nvidia-smi
+  register: nvidia_smi_result
+  changed_when: false
+  failed_when: false
+
+- name: Assert nvidia-smi succeeded
+  ansible.builtin.assert:
+    that:
+      - nvidia_smi_result.rc == 0
+    fail_msg: |
+      nvidia-smi failed after the NVIDIA workflow completed. One likely cause is
+      that the required reboot has not happened yet after installation or module
+      build.
+
+      Useful diagnostics:
+      mokutil --sb-state
+      modinfo -k "$(uname -r)" nvidia
+      nvidia-smi
+      journalctl -b -k | grep -iE 'nvidia|nouveau|secure boot'
+      ls -la /var/cache/akmods/
+
+- name: Report successful NVIDIA post-reboot verification
+  ansible.builtin.debug:
+    msg: "NVIDIA installation and post-reboot verification completed successfully."

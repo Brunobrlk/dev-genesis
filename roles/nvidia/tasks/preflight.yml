@@ -1,0 +1,24 @@
+---
+- name: Ensure mokutil is installed for Secure Boot checks
+  become: true
+  ansible.builtin.package:
+    name: "{{ nvidia_secure_boot_packages }}"
+    state: present
+
+- name: Read Secure Boot state with mokutil
+  ansible.builtin.command:
+    argv:
+      - mokutil
+      - --sb-state
+  register: nvidia_mokutil_state
+  changed_when: false
+
+- name: Fail when Secure Boot is enabled for NVIDIA workflow
+  ansible.builtin.assert:
+    that:
+      - "'enabled' not in (nvidia_mokutil_state.stdout | lower)"
+    fail_msg: >-
+      Secure Boot appears to be enabled on this system. This NVIDIA role does
+      not currently manage MOK generation, MOK enrollment, or NVIDIA kernel
+      module signing. Disable Secure Boot before running this workflow.
+  when: nvidia_require_secure_boot_disabled | bool

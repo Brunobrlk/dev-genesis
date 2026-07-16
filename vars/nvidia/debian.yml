@@ -1,4 +1,3 @@
 ---
 nvidia_distro_family: debian
 nvidia_driver_source: distro
-nvidia_reboot_required: true
