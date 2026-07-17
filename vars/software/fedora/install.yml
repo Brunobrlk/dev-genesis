@@ -45,6 +45,15 @@ software_install:
   - method: redhat/dnf
     package: translate-shell
 
+  - method: redhat/dnf
+    package: trash-cli
+
+  - method: redhat/dnf
+    package: rofimoji
+
+  - method: redhat/dnf
+    package: fastfetch
+
   - name: brave
     method: redhat/rpm_repository
     package: brave-browser
