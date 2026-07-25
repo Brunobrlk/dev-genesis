@@ -22,6 +22,18 @@ software_install:
     package: make
 
   - method: debian/apt
+    package: cmake
+
+  - method: debian/apt
+    package: g++
+
+  - method: debian/apt
+    package: clang
+
+  - method: debian/apt
+    package: ninja-build
+
+  - method: debian/apt
     package: gcc
 
   - method: debian/apt

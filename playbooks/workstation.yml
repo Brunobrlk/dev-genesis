@@ -33,6 +33,9 @@
     - role: mise
       tags: [ workstation, mise ]
 
+    - role: platformio
+      tags: [ workstation, platformio ]
+
     - role: android_dev
       tags: [ workstation, android_dev ]
 

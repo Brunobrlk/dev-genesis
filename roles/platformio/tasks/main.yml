@@ -1,0 +1,71 @@
+---
+- name: Assert platformio role supports Linux
+  ansible.builtin.assert:
+    that:
+      - ansible_system == "Linux"
+      - target_distro is defined
+      - target_distro in ['fedora', 'debian']
+    fail_msg: "The platformio role requires Linux with target_distro set to fedora or debian."
+
+- name: Install platformio dependencies
+  ansible.builtin.include_role:
+    name: software
+    tasks_from: api_install_many
+  vars:
+    software_items: "{{ platformio_install | default([]) }}"
+
+- name: Download platformio installer
+  ansible.builtin.get_url:
+    url: "{{ platformio_installer_url }}"
+    dest: "{{ platformio_installer_path }}"
+    mode: "0755"
+
+- name: Check whether PlatformIO core is installed
+  ansible.builtin.command:
+    cmd: "python3 {{ platformio_installer_path }} check core"
+  environment: "{{ platformio_environment }}"
+  register: platformio_check
+  changed_when: false
+  failed_when: false
+
+- name: Install PlatformIO core
+  ansible.builtin.command:
+    cmd: "python3 {{ platformio_installer_path }}"
+  environment: "{{ platformio_environment }}"
+  when: platformio_check.rc != 0
+
+- name: Ensure platformio shell commands directory exists
+  ansible.builtin.file:
+    path: "{{ platformio_user_bin_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Link platformio shell commands
+  ansible.builtin.file:
+    src: "{{ platformio_core_dir }}/penv/bin/{{ item }}"
+    dest: "{{ platformio_user_bin_dir }}/{{ item }}"
+    state: link
+    force: true
+  loop: "{{ platformio_shell_commands }}"
+  loop_control:
+    label: "{{ item }}"
+
+- name: Install platformio udev rules
+  ansible.builtin.get_url:
+    url: "{{ platformio_udev_rules_url }}"
+    dest: "{{ platformio_udev_rules_path }}"
+    mode: "0644"
+  become: true
+  register: platformio_udev_rules
+
+- name: Reload udev rules
+  ansible.builtin.command:
+    cmd: udevadm control --reload-rules
+  become: true
+  when: platformio_udev_rules.changed
+
+- name: Trigger udev
+  ansible.builtin.command:
+    cmd: udevadm trigger
+  become: true
+  when: platformio_udev_rules.changed

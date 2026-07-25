@@ -127,6 +127,7 @@ This avoids accidentally applying workstation automation to the wrong machine.
 | `display`             | Display-server-specific setup: Xorg or Wayland |
 | `optimize`            | System-level workstation tuning                |
 | `mise`                | Runtime/tool version manager setup             |
+| `platformio`          | PlatformIO Core, shell commands, Linux udev rules |
 | `android_dev`         | Android SDK, AVDs, Android Studio versions     |
 | `docker`              | Docker Engine and user permissions             |
 | `virtualization_host` | KVM/libvirt host setup                         |
@@ -187,6 +188,7 @@ Some tools get their own role because they need validation, configuration, gener
 | Role                         | Why it is dedicated                                           |
 | ---------------------------- | ------------------------------------------------------------- |
 | `mise`                       | Bash activation, completions, global runtime support          |
+| `platformio`                 | User-scope installer script, shell symlinks, Linux udev rules |
 | `tmux`                       | TPM and theme repository setup                                |
 | `android_dev`                | SDK root, command-line tools, licenses, AVDs, Studio archives |
 | `docker`                     | Official repository, packages, service, group membership      |

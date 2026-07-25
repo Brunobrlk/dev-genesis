@@ -22,7 +22,22 @@ software_install:
     package: make
 
   - method: redhat/dnf
+    package: cmake
+
+  - method: redhat/dnf
     package: gcc
+
+  - method: redhat/dnf
+    package: gcc-c++
+
+  - method: redhat/dnf
+    package: clang 
+
+  - method: redhat/dnf
+    package: ninja-build 
+
+  - method: redhat/dnf
+    package: clang-tools-extra 
 
   - method: redhat/dnf
     package: unzip
