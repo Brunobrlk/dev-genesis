@@ -3,7 +3,7 @@
   ansible.builtin.import_tasks: validation.yml
 
 - name: Restore VM disks
-  ansible.builtin.import_tasks: copy_disks.yml
+  ansible.builtin.import_tasks: import_disks.yml
 
 - name: Restore VM SELinux labels
   ansible.builtin.import_tasks: selinux.yml

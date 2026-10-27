@@ -14,9 +14,7 @@ vms_restore_selinux_labels: true
 
 # Linux only. Windows intentionally excluded from V1.
 vms_names:
-  - fedora_desktop
-  - debian_desktop
-  - ubuntu_desktop
-  - debian_server
-  - fedora_server
-  - ubuntu_server
+  - fedora44-i3
+  - fedora44
+  - fedora44-server
+  - debian13-server

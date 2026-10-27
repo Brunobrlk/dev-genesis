@@ -5,5 +5,5 @@
 - name: Export VM domains
   ansible.builtin.import_tasks: export_domains.yml
 
-- name: Copy VM disks
-  ansible.builtin.import_tasks: copy_disks.yml
+- name: Export VM disks
+  ansible.builtin.import_tasks: export_disks.yml
