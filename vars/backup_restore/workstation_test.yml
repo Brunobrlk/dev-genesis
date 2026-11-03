@@ -1,8 +1,8 @@
 ---
 items:
   - name: secure-local-share-test
-    local: "{{ ansible_user_dir }}/.local/share/secure/"
-    backup: "{{ backup_catalog_root }}/.local/share/secure/"
+    local: "{{ ansible_user_dir }}/.local/share/private/"
+    backup: "{{ backup_catalog_root }}/.local/share/private/"
     mode: "0700"
     rsync_options:
       - --include=/README.md

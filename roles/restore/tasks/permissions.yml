@@ -129,20 +129,20 @@
     restore_has_secure_share: >-
       {{
         (restore_items_to_process | default([]))
-        | selectattr('local', 'equalto', ansible_user_dir ~ '/.local/share/secure/')
+        | selectattr('local', 'equalto', ansible_user_dir ~ '/.local/share/private/')
         | list
         | length > 0
       }}
 
 - name: Check restored secure local share directory
   ansible.builtin.stat:
-    path: "{{ ansible_user_dir }}/.local/share/secure"
+    path: "{{ ansible_user_dir }}/.local/share/private"
   register: restore_secure_share_stat
   when: restore_has_secure_share
 
 - name: Find restored secure local share subdirectories
   ansible.builtin.find:
-    paths: "{{ ansible_user_dir }}/.local/share/secure"
+    paths: "{{ ansible_user_dir }}/.local/share/private"
     file_type: directory
     recurse: true
   register: restore_secure_share_directories
@@ -152,7 +152,7 @@
 
 - name: Find restored secure local share files
   ansible.builtin.find:
-    paths: "{{ ansible_user_dir }}/.local/share/secure"
+    paths: "{{ ansible_user_dir }}/.local/share/private"
     file_type: file
     recurse: true
   register: restore_secure_share_files
@@ -165,7 +165,7 @@
   ansible.builtin.file:
     path: "{{ item.path }}"
     mode: "0700"
-  loop: "{{ restore_secure_share_directories.files | default([]) + ([{'path': ansible_user_dir ~ '/.local/share/secure'}] if restore_secure_share_stat.stat.exists else []) }}"
+  loop: "{{ restore_secure_share_directories.files | default([]) + ([{'path': ansible_user_dir ~ '/.local/share/private'}] if restore_secure_share_stat.stat.exists else []) }}"
   loop_control:
     label: "{{ item.path }}"
   when:

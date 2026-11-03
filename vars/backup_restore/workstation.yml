@@ -1,20 +1,5 @@
 ---
 items:
-  - name: secure-local-share
-    local: "{{ ansible_user_dir }}/.local/share/secure/"
-    backup: "{{ backup_catalog_root }}/.local/share/secure/"
-    mode: "0700"
-
-  - name: ssh
-    local: "{{ ansible_user_dir }}/.ssh/"
-    backup: "{{ backup_catalog_root }}/.ssh/"
-    mode: "0700"
-
-  - name: gnupg
-    local: "{{ ansible_user_dir }}/.gnupg/"
-    backup: "{{ backup_catalog_root }}/.gnupg/"
-    mode: "0700"
-
   - name: development
     local: "{{ ansible_user_dir }}/Development/"
     backup: "{{ backup_catalog_root }}/Development/"
@@ -35,9 +20,9 @@ items:
     local: "{{ ansible_user_dir }}/Documents/"
     backup: "{{ backup_catalog_root }}/Documents/"
 
-  - name: videos
-    local: "{{ ansible_user_dir }}/Videos/"
-    backup: "{{ backup_catalog_root }}/Videos/"
+  - name: downloads
+    local: "{{ ansible_user_dir }}/Downloads/"
+    backup: "{{ backup_catalog_root }}/Downloads/"
 
   - name: music
     local: "{{ ansible_user_dir }}/Music/"
@@ -46,3 +31,12 @@ items:
   - name: pictures
     local: "{{ ansible_user_dir }}/Pictures/"
     backup: "{{ backup_catalog_root }}/Pictures/"
+
+  - name: videos
+    local: "{{ ansible_user_dir }}/Videos/"
+    backup: "{{ backup_catalog_root }}/Videos/"
+
+  - name: local-share-secure
+    local: "{{ ansible_user_dir }}/.local/share/private/"
+    backup: "{{ backup_catalog_root }}/.local/share/private/"
+    mode: "0700"
