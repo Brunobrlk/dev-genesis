@@ -64,10 +64,19 @@ software_install:
     package: trash-cli
 
   - method: redhat/dnf
+    package: rofi
+
+  - method: redhat/dnf
     package: rofimoji
 
   - method: redhat/dnf
     package: fastfetch
+
+  - method: redhat/dnf
+    package: alacritty
+
+  - method: redhat/dnf
+    package: diff-so-fancy
 
   - name: brave
     method: redhat/rpm_repository
