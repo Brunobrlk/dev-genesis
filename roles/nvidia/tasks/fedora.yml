@@ -6,7 +6,7 @@
       - "{{ nvidia_fedora_rpmfusion_free_release_rpm }}"
       - "{{ nvidia_fedora_rpmfusion_nonfree_release_rpm }}"
     state: present
-    disable_gpg_check: false
+    disable_gpg_check: true
 
 - name: Install NVIDIA driver packages on Fedora
   become: true
@@ -14,6 +14,7 @@
     name: "{{ nvidia_fedora_packages }}"
     state: present
     update_cache: true
+    disable_gpg_check: false
   register: nvidia_fedora_package_install
 
 - name: Check whether NVIDIA module exists for the current Fedora kernel
