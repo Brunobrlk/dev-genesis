@@ -86,34 +86,12 @@ software_install:
       filename: brave-browser.repo
       url: https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
 
-  - name: anydesk
-    method: redhat/rpm_repository
-    package: anydesk
-    repo:
-      mode: inline
-      filename: AnyDesk-Fedora.repo
-      content: |
-        [anydesk]
-        name=AnyDesk Fedora - stable
-        baseurl=http://rpm.anydesk.com/fedora/$basearch/
-        gpgcheck=1
-        repo_gpgcheck=1
-        gpgkey=https://keys.anydesk.com/repos/RPM-GPG-KEY
-
   - name: dbeaver
     method: redhat/github_release_rpm
     package: dbeaver-ce
     github_repo: dbeaver/dbeaver
     asset_pattern: dbeaver-ce-{version}-linux-x86_64.rpm
     gpg_check: false
-
-  - name: postman
-    method: common/archive_to_opt
-    url: https://dl.pstmn.io/download/latest/linux64
-    archive_name: postman.tar.gz
-    destination: "{{ ansible_user_dir }}/opt/postman"
-    strip_components: 1
-    creates: "{{ ansible_user_dir }}/opt/postman/Postman"
 
   - name: scrcpy
     method: redhat/copr
